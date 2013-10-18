@@ -134,12 +134,13 @@ can_regenerate()
 }
 
 FILE *flevelinfo;
+extern int random_seed;
 
 write_level_info()
 {
 	s_level *lev = Is_special(&u.uz);
 	if (lev) {
-		fprintf(flevelinfo, "%s:%d\n", lev->proto, depth(&u.uz));
+		fprintf(flevelinfo, "%d:%s:%d\n", random_seed, lev->proto, depth(&u.uz));
 		//pline("%s:%d\n", lev->proto, depth(&u.uz));
 	}
 	//wiz_map();

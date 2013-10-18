@@ -454,10 +454,12 @@ static struct tm *NDECL(getlt);
 gsl_rng *rng_state = NULL;
 #endif
 
+int random_seed;
+
 void
 setrandom()
 {
-	int random_seed=0;
+	random_seed=0;
 #ifdef DEV_RANDOM
 	FILE *fptr = NULL;
 
@@ -465,31 +467,34 @@ setrandom()
 	if (fptr) fread(&random_seed, sizeof(int),1,fptr);
 	fclose(fptr);
 #endif
+	int current_time = time((time_t *)0);
+	random_seed = (int)current_time + random_seed;
+
 #ifdef USE_MERSENNE_TWISTER
 	if (rng_state != NULL) { gsl_rng_free(rng_state); }
 	rng_state = gsl_rng_alloc(gsl_rng_mt19937);
-	gsl_rng_set(rng_state, (int) (time((time_t *)0)) + random_seed);
+	gsl_rng_set(rng_state, random_seed);
 #else
 	/* the types are different enough here that sweeping the different
 	 * routine names into one via #defines is even more confusing
 	 */
 #ifdef RANDOM	/* srandom() from sys/share/random.c */
-	srandom((unsigned int) time((time_t *)0));
+	srandom((unsigned int) current_time);
 #else
 # if defined(__APPLE__) || defined(BSD) || defined(LINUX) || defined(ULTRIX) || defined(CYGWIN32) /* system srandom() */
 #  if defined(BSD) && !defined(POSIX_TYPES)
 #   if defined(SUNOS4)
 	(void)
 #   endif
-		srandom((int) (time((long *)0) + random_seed));
+		srandom(random_seed);
 #  else
-		srandom((int) (time((time_t *)0)) + random_seed);
+		srandom(random_seed);
 #  endif
 # else
 #  ifdef UNIX	/* system srand48() */
-	srand48((long) time((time_t *)0));
+	srand48((long) current_time);
 #  else		/* poor quality system routine */
-	srand((int) time((time_t *)0));
+	srand((int) current_time);
 #  endif
 # endif
 #endif
