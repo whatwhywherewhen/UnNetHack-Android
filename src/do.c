@@ -1418,7 +1418,7 @@ boolean at_stairs, falling, portal;
 	 *  Move all plines beyond the screen reset.
 	 */
 
-#if 0
+#if LEVEL_STAT
 	/* give room entrance message, if any */
 	check_special_room(FALSE);
 
@@ -1533,6 +1533,7 @@ boolean at_stairs, falling, portal;
 	    final_level();
 	else
 	    onquest();
+#endif
 	assign_level(&u.uz0, &u.uz); /* reset u.uz0 */
 
 	/* show level annotation when entering the level */
@@ -1540,7 +1541,6 @@ boolean at_stairs, falling, portal;
 	    (annotation = get_annotation(&u.uz))) {
 		You("annotated this level: %s", annotation);
 	}
-#endif
 
 #ifdef INSURANCE
 	save_currentstate();

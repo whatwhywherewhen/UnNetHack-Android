@@ -561,6 +561,7 @@ boolean pets_only;	/* true for ascension or final escape */
 		/* monster won't follow if it hasn't noticed you yet */
 		&& !(mtmp->mstrategy & STRAT_WAITFORU)) {
 		stay_behind = FALSE;
+#if LEVEL_STAT
 		if (mtmp->mtame && mtmp->meating) {
 			if (canseemon(mtmp))
 			    pline("%s is still eating.", Monnam(mtmp));
@@ -583,6 +584,7 @@ boolean pets_only;	/* true for ascension or final escape */
 			    pline("%s is still trapped.", Monnam(mtmp));
 			stay_behind = TRUE;
 		}
+#endif
 #ifdef STEED
 		if (mtmp == u.usteed) stay_behind = FALSE;
 #endif
