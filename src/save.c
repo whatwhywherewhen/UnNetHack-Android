@@ -156,6 +156,7 @@ dosave0()
 	if (!saveDiskPrompt(0)) return 0;
 #endif
 
+#ifndef ANDROID
 	HUP if (iflags.window_inited) {
 	    uncompress_area(fq_save, SAVEF);
 	    fd = open_savefile();
@@ -169,7 +170,8 @@ dosave0()
 		}
 	    }
 	}
-
+#endif
+	
 	HUP mark_synch();	/* flush any buffered screen output */
 
 	fd = create_savefile();

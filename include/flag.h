@@ -25,6 +25,9 @@ struct flag {
 	boolean  autodig;       /* MRKR: Automatically dig */
 	boolean  autoquiver;	/* Automatically fill quiver */
 	boolean  autounlock;	/* Automatically apply unlocking tool */
+#ifdef ANDROID
+	boolean  autokick;		/* Automatically kick doors and force locks */
+#endif
 	boolean  beginner;
 #ifdef MAIL
 	boolean  biff;		/* enable checking for mail */
@@ -385,6 +388,9 @@ struct instance_flags {
 	boolean  vanilla_ui_behavior;	/* fall back to vanilla behavior */
 	boolean  show_annotation;	/* level annotation when entering level */
 	int  statuslines;	/* number of status lines */
+#ifdef ANDROID
+	boolean  automenu; /* Automatically show menues */
+#endif
 };
 
 /*

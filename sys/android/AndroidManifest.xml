@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	package="com.tbd.UnNetHack"
+	android:versionCode="2"
+	android:versionName="5.1.0_1"
+	android:installLocation="auto">
+	<uses-sdk
+		android:minSdkVersion="7"/>
+	<uses-permission
+		android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+	<application
+		android:label="UnNetHack"
+		android:icon="@drawable/icon"
+		android:debuggable="false"
+		android:theme="@android:style/Theme"
+		android:allowBackup="true">
+		<activity
+			android:name=".UnNetHack"
+			android:label="UnNetHack"
+			android:windowSoftInputMode="adjustResize|stateAlwaysHidden"
+			android:launchMode="singleTask"
+			android:configChanges="mcc|mnc|locale|keyboard|keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|fontScale">
+			<!-- Prevent activity from restarting when configuration changes -->
+			<intent-filter>
+				<action
+					android:name="android.intent.action.MAIN"/>
+				<category
+					android:name="android.intent.category.LAUNCHER"/>
+			</intent-filter>
+		</activity>
+		<activity
+			android:name="Settings"
+			android:label="UnNetHack Settings">
+		</activity>
+		<activity
+			android:name="Instructions"
+			android:label="UnNetHack Instructions">
+		</activity>
+	</application>
+</manifest> 

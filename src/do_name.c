@@ -5,6 +5,9 @@
 #include "hack.h"
 
 static void FDECL(getpos_help, (BOOLEAN_P,const char *));
+#ifdef ANDROID
+static void FDECL(docall_ext, (struct obj *,boolean));
+#endif
 
 extern const char what_is_an_unknown_object[];		/* from pager.c */
 
@@ -154,7 +157,7 @@ const char *goal;
 #endif
     curs(WIN_MAP, cx,cy);
     flush_screen(0);
-#ifdef MAC
+#if defined(MAC) || defined(ANDROID)
     lock_mouse_cursor(TRUE);
 #endif
     for (;;) {
@@ -301,7 +304,7 @@ const char *goal;
 	curs(WIN_MAP,cx,cy);
 	flush_screen(0);
     }
-#ifdef MAC
+#if defined(MAC) || defined(ANDROID)
     lock_mouse_cursor(FALSE);
 #endif
     if (msg_given) clear_nhwindow(WIN_MESSAGE);
@@ -600,16 +603,34 @@ ddocall()
 				You("would never recognize another one.");
 				return 0;
 			}
+#ifdef ANDROID
+			docall_ext(obj, FALSE);
+#else
 			docall(obj);
+#endif
 		}
 		break;
 	}
 	return 0;
 }
 
+#ifdef ANDROID
 void
 docall(obj)
 register struct obj *obj;
+{
+	docall_ext(obj, TRUE);
+}
+
+void
+docall_ext(obj, showlog)
+register struct obj *obj;
+boolean showlog;
+#else
+void
+docall(obj)
+register struct obj *obj;
+#endif
 {
 	char buf[BUFSZ], qbuf[QBUFSZ];
 	struct obj otemp;
@@ -627,6 +648,11 @@ register struct obj *obj;
 		    OBJ_DESCR(objects[otemp.otyp]));
 	else
 	    Sprintf(qbuf, "Call %s:", an(xname(&otemp)));
+#ifdef ANDROID
+	if( showlog )
+		and_getlin_log(qbuf, buf);
+	else
+#endif
 	getlin(qbuf, buf);
 	if(!*buf || *buf == '\033')
 		return;

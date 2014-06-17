@@ -1645,18 +1645,20 @@ lootcont:
 		if (cobj->olocked) {
 		    pline("Hmmm, it seems to be locked.");
 		    /* autounlock only works properly with one container */
-		    if (flags.autounlock && container_count == 1) {
-			if(cobj->otyp == IRON_SAFE) {
-			    if((otmp = carrying(STETHOSCOPE))) {
-				pick_lock(otmp, cc.x, cc.y, TRUE);
-			    }
-			} else {
-			    if(((otmp = carrying(SKELETON_KEY)) ||
+		    if(container_count == 1) {
+			if(flags.autounlock && cobj->otyp == IRON_SAFE && (otmp = carrying(STETHOSCOPE))) {
+			    pick_lock(otmp, cc.x, cc.y, TRUE);
+			} else if(flags.autounlock &&
+				((otmp = carrying(SKELETON_KEY)) ||
 				(otmp = carrying(CREDIT_CARD)) ||
 				(otmp = carrying(LOCK_PICK)))) {
-				    pick_lock(otmp, cc.x, cc.y, TRUE);
-			    }
+			    	pick_lock(otmp, cc.x, cc.y, TRUE);
 			}
+#ifdef ANDROID
+			else if (flags.autokick && cobj->otyp != IRON_SAFE) {
+		    	doforce_ext(TRUE);
+			}
+#endif
 		    }
 		    continue;
 		}

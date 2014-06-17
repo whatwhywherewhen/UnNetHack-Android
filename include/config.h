@@ -126,6 +126,17 @@
 # endif
 #endif
 
+#ifdef ANDROID
+# ifdef TTY_GRAPHICS
+# undef TTY_GRAPHICS
+# endif
+# ifdef DEFAULT_WINDOW_SYS
+#  pragma message("android only supports 'and' graphics system")
+#  undef DEFAULT_WINDOW_SYS
+# endif
+# define DEFAULT_WINDOW_SYS "and"
+#endif
+
 #ifndef DEFAULT_WINDOW_SYS
 # define DEFAULT_WINDOW_SYS "tty"
 #endif
@@ -187,7 +198,7 @@
  */
 
 #ifndef AUTOCONF
-#ifdef UNIX
+#if defined(UNIX) && !defined(ANDROID)
 /* path and file name extension for compression program */
 /* #define COMPRESS "/usr/bin/compress" */	/* Lempel-Ziv compression */
 /* #define COMPRESS_EXTENSION ".Z"	*/	/* compress's extension */
@@ -215,7 +226,7 @@
  */
 #define INSURANCE	/* allow crashed game recovery */
 
-#ifndef MAC
+#if !defined(MAC) && !defined(ANDROID)
 # define CHDIR		/* delete if no chdir() available */
 #endif
 

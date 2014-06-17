@@ -39,7 +39,7 @@ const
 extern int errno;
 #endif
 
-#if defined(UNIX) && defined(QT_GRAPHICS)
+#if defined(UNIX) && defined(QT_GRAPHICS) || defined(ANDROID)
 #include <dirent.h>
 #endif
 
@@ -900,7 +900,7 @@ d_level *lev;
 #ifdef FILE_AREAS
 	ret = rename_area(FILE_AREA_BONES, tempname, bones);
 #else
-# if (defined(SYSV) && !defined(SVR4)) || defined(GENIX)
+# if (defined(SYSV) && !defined(SVR4) && !defined(ANDROID)) || defined(GENIX)
 	/* old SYSVs don't have rename.  Some SVR3's may, but since they
 	 * also have link/unlink, it doesn't matter. :-)
 	 */
@@ -1183,7 +1183,7 @@ restore_saved_game()
 	return fd;
 }
 
-#if defined(UNIX) && defined(QT_GRAPHICS)
+#if defined(UNIX) && defined(QT_GRAPHICS) || defined(ANDROID)
 /*ARGSUSED*/
 static char*
 plname_from_file(filename)
@@ -1210,7 +1210,7 @@ const char* filename;
 
     return result;
 #else
-# if defined(UNIX) && defined(QT_GRAPHICS)
+# if defined(UNIX) && defined(QT_GRAPHICS) || defined(ANDROID)
     /* Name not stored in save file, so we have to extract it from
        the filename, which loses information
        (eg. "/", "_", and "." characters are lost. */
@@ -1222,7 +1222,11 @@ const char* filename;
 #else
 #define EXTSTR ""
 #endif
+#ifdef ANDROID
+    if ( sscanf( filename, "%*[^/]/%63[^.]" EXTSTR, name ) == 1 ) {
+#else
     if ( sscanf( filename, "%*[^/]/%d%63[^.]" EXTSTR, &uid, name ) == 2 ) {
+#endif
 #undef EXTSTR
     /* "_" most likely means " ", which certainly looks nicer */
 	for (k=0; name[k]; k++)
@@ -1237,6 +1241,27 @@ const char* filename;
 #endif
 }
 #endif /* defined(UNIX) && defined(QT_GRAPHICS) */
+
+#ifdef ANDROID
+static char*
+strip_uid(name, uid)
+char *name;
+int uid;
+{
+	char suid[10];
+	int i = 0;
+	while(uid > 0) {
+		suid[i] = '0'+uid%10;
+		uid /= 10;
+		i++;
+	}
+	while(i > 0 && *name == suid[--i])
+		name++;
+	if(i == 0)
+		return name;
+	return 0;
+}
+#endif
 
 char**
 get_saved_games()
@@ -1265,6 +1290,40 @@ get_saved_games()
 	result[j++] = 0;
 	return result;
     } else
+#elif defined(ANDROID)
+    int myuid=getuid();
+    struct dirent **namelist;
+    struct dirent **namelist2;
+    int n1 = scandir("save", &namelist, 0, alphasort);
+    int n2 = scandir(".", &namelist2, 0, alphasort);
+    if(n1 < 0) n1 = 0;
+    if(n2 < 0) n2 = 0;
+	int i,j=0;
+    char name[64]; /* more than PL_NSIZ */
+    char* uname;
+	char** result = (char**)alloc((n1+n2+1)*sizeof(char*)); /* at most */
+	for (i=0; i<n1; i++) {
+	    if ( sscanf( namelist[i]->d_name, "%63s", name ) == 1 ) {
+		if ( (uname=strip_uid(name, myuid)) ) {
+		    char filename[BUFSZ];
+		    char* r;
+		    Sprintf(filename,"save/%s",uname);
+		    r = plname_from_file(filename);
+		    if ( r )
+			result[j++] = r;
+		}
+	    }
+	}
+	for (i=0; i<n2; i++) {
+	    if ( sscanf( namelist2[i]->d_name, "%63[^.]", name ) == 1 ) {
+		if ( (uname=strip_uid(name, myuid)) ) {
+			if(j==0 || strcmp(result[j-1], uname))
+				result[j++] = strdup(uname);
+		}
+	    }
+	}
+	result[j++] = 0;
+	return result;
 #endif
     {
 	return 0;
@@ -1788,13 +1847,13 @@ const char *filearea, *filename;
 /* ----------  BEGIN CONFIG FILE HANDLING ----------- */
 
 const char* configfile =
-#ifdef UNIX
+#if defined(UNIX) && !defined(ANDROID)
 			".unnethackrc";
 #else
 # if defined(MAC) || defined(__BEOS__)
 			"UnNetHack Defaults";
 # else
-#  if defined(MSDOS) || defined(WIN32)
+#  if defined(MSDOS) || defined(WIN32) || defined(ANDROID)
 			"defaults.unh";
 #  else
 			"UnNetHack.cnf";
@@ -1803,13 +1862,13 @@ const char* configfile =
 #endif
 
 const char *oldconfigfile =
-#ifdef UNIX
+#if defined(UNIX) && !defined(ANDROID)
 			".nethackrc";
 #else
 # if defined(MAC) || defined(__BEOS__)
 			"NetHack Defaults";
 # else
-#  if defined(MSDOS) || defined(WIN32)
+#  if defined(MSDOS) || defined(WIN32) || defined(ANDROID)
 			"defaults.nh";
 #  else
 			"NetHack.cnf";
@@ -1874,7 +1933,7 @@ const char *filename;
 		}
 	}
 
-#if defined(MICRO) || defined(MAC) || defined(__BEOS__) || defined(WIN32)
+#if defined(MICRO) || defined(MAC) || defined(__BEOS__) || defined(WIN32) || defined(ANDROID) 
 	if ((fp = fopenp(fqname(configfile, CONFIGPREFIX, 0), "r")) != (FILE *)0)
 		return(fp);
 	/* try .nethackrc? */
@@ -2501,7 +2560,7 @@ fopen_wizkit_file()
 #endif
 	}
 
-#if defined(MICRO) || defined(MAC) || defined(__BEOS__) || defined(WIN32)
+#if defined(MICRO) || defined(MAC) || defined(__BEOS__) || defined(WIN32) || defined(ANDROID) 
 	if ((fp = fopenp(fqname(wizkit, CONFIGPREFIX, 0), "r"))
 								!= (FILE *)0)
 		return(fp);

@@ -479,8 +479,19 @@ boolean explicit; /**< Mentioning tool when (un)locking doors? */
 	return(1);
 }
 
+#ifdef ANDROID
+int
+doforce()
+{
+	return doforce_ext(FALSE);
+}
+int
+doforce_ext(silent_fail)
+boolean silent_fail;
+#else
 int
 doforce()		/* try to force a chest with your weapon */
+#endif
 {
 	register struct obj *otmp;
 	register int c, picktyp;
@@ -496,6 +507,9 @@ doforce()		/* try to force a chest with your weapon */
 	   || uwep->otyp == RUBBER_HOSE
 #endif
 	  ) {
+#ifdef ANDROID
+		if(silent_fail) return(0);
+#endif
 	    You_cant("force anything without a %sweapon.",
 		  (uwep) ? "proper " : "");
 	    return(0);
@@ -625,6 +639,11 @@ doopen_indir(x, y)		/* try to open a door in direction u.dx/u.dy */
 		     (otmp = carrying(LOCK_PICK)))) {
 			pick_lock(otmp, cc.x, cc.y, TRUE);
 		}
+#ifdef ANDROID
+		else if ( flags.autokick ) {
+			autokick();
+		}
+#endif
 	    }
 	    return(0);
 	}

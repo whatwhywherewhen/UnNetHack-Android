@@ -453,6 +453,10 @@ E void FDECL(wantdoor, (int,int,genericptr_t));
 E boolean FDECL(ghitm, (struct monst *,struct obj *));
 E void FDECL(container_impact_dmg, (struct obj *));
 E int NDECL(dokick);
+#ifdef ANDROID
+E int NDECL(autokick);
+E int FDECL(dokick_ext, (boolean));
+#endif
 E boolean FDECL(ship_object, (struct obj *,XCHAR_P,XCHAR_P,BOOLEAN_P));
 E void NDECL(obj_delivery);
 E schar FDECL(down_gate, (XCHAR_P,XCHAR_P));
@@ -980,13 +984,20 @@ E boolean FDECL(picking_at, (int,int));
 E void NDECL(reset_pick);
 E int FDECL(pick_lock, (struct obj *,int,int,BOOLEAN_P));
 E int NDECL(doforce);
+#ifdef ANDROID
+E int FDECL(doforce_ext, (boolean));
+#endif
 E boolean FDECL(boxlock, (struct obj *,struct obj *));
 E boolean FDECL(doorlock, (struct obj *,int,int));
 E int NDECL(doopen);
+E int FDECL(doopen_ext, (boolean, boolean));
 E int NDECL(doclose);
 E int FDECL(artifact_door, (int,int));
 #ifdef AUTO_OPEN
 E  int FDECL(doopen_indir,(int,int));
+#endif
+#ifdef ANDROID
+E void FDECL(lock_mouse_cursor, (boolean));
 #endif
 
 #ifdef MAC

@@ -1,6 +1,8 @@
 *.swp
 *.swo
 compile
+.idea
+out
 
 # /
 /Makefile
@@ -51,6 +53,7 @@ compile
 /src/vis_tab.c
 /src/monstr.c
 /src/tile.c
+/src/Sysandroid
 
 # /util/
 /util/*.o
@@ -68,3 +71,9 @@ compile
 
 # /win/
 /win/*/*.o
+
+
+/sys/android/bin
+/sys/android/libs
+/sys/android/assets/unnethackdir
+/sys/android/gen

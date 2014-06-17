@@ -1020,16 +1020,37 @@ int enhance_skill(boolean want_dump)
 		 * The "    " is room for a selection letter and dash, "a - ".
 		 */
 		if (can_advance(i, speedy))
-		    prefix = "";	/* will be preceded by menu choice */
+	#ifdef ANDROID
+			prefix = "+ ";	/* will be preceded by menu choice */
+	#else
+			prefix = "";	/* will be preceded by menu choice */
+	#endif		    
 		else if (could_advance(i))
-		    prefix = "  * ";
+	#ifdef ANDROID
+			prefix = "* ";
+	#else
+			prefix = "  * ";
+	#endif		    
 		else if (peaked_skill(i))
-		    prefix = "  # ";
+	#ifdef ANDROID
+			prefix = "# ";
+	#else
+			prefix = "  # ";
+	#endif
 		else if (can_almost_advance(i))
+	#ifdef ANDROID
+		    prefix = "> ";
+	#else
 		    prefix = "  > ";
+	#endif
 		else
+	#ifdef ANDROID
+		    prefix = (to_advance + eventually_advance + maxxed_cnt +
+			      almost_advance > 0) ? "  " : "";
+	#else
 		    prefix = (to_advance + eventually_advance + maxxed_cnt +
 			      almost_advance > 0) ? "    " : "";
+	#endif
 		(void) skill_level_name(i, sklnambuf);
 #ifdef WIZARD
 		if (wizard) {

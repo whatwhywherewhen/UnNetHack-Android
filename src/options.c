@@ -56,12 +56,18 @@ static struct Bool_Opt
 	{"asksavedisk", (boolean *)0, FALSE, SET_IN_FILE},
 #endif
 	{"autodig", &flags.autodig, FALSE, SET_IN_GAME},
+#ifdef ANDROID
+	{"automenu", &iflags.automenu, TRUE, SET_IN_GAME},
+#endif
 #ifdef AUTO_OPEN
 	{"autoopen", &iflags.autoopen, TRUE, SET_IN_GAME},
 #endif /* AUTO_OPEN */
 	{"autopickup", &flags.pickup, TRUE, SET_IN_GAME},
 	{"autoquiver", &flags.autoquiver, FALSE, SET_IN_GAME},
 	{"autounlock", &flags.autounlock, TRUE, SET_IN_GAME},
+#ifdef ANDROID
+	{"autokick", &flags.autokick, TRUE, SET_IN_GAME},
+#endif
 #if defined(MICRO) && !defined(AMIGA)
 	{"BIOS", &iflags.BIOS, FALSE, SET_IN_FILE},
 #else
@@ -488,6 +494,10 @@ static boolean need_redraw; /* for doset() */
 
 #if defined(TOS) && defined(TEXTCOLOR)
 extern boolean colors_changed;	/* in tos.c */
+#endif
+
+#ifdef ANDROID
+	extern boolean autoMenuFromFile;
 #endif
 
 #ifdef VIDEOSHADES
@@ -3141,6 +3151,12 @@ goodfruit:
 
 			duplicate_opt_detection(boolopt[i].name, 0);
 
+#ifdef ANDROID
+		    if(initial && tfrom_file) {
+		    	if((boolopt[i].addr) == &iflags.automenu)
+		    		autoMenuFromFile = TRUE;
+		    }
+#endif
 #if defined(TERMLIB) || defined(ASCIIGRAPH) || defined(MAC_GRAPHICS_ENV) || defined(CURSES_GRAPHICS)
 			if (FALSE
 # ifdef TERMLIB

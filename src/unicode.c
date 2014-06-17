@@ -37,7 +37,11 @@ static glyph_t cp437_to_unicode[] = {
 	0x00a2, /* CENT SIGN */
 	0x00a3, /* POUND SIGN */
 	0x00a5, /* YEN SIGN */
+#ifdef ANDROID
+	0x20b1, /* PESO SIGN */
+#else
 	0x20a7, /* PESETA SIGN */
+#endif
 	0x0192, /* LATIN SMALL LETTER F WITH HOOK */
 	0x00e1, /* LATIN SMALL LETTER A WITH ACUTE */
 	0x00ed, /* LATIN SMALL LETTER I WITH ACUTE */

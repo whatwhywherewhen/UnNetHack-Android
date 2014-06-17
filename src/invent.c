@@ -19,6 +19,8 @@ STATIC_PTR int FDECL(ckunpaid,(struct obj *));
 STATIC_PTR int FDECL(ckvalidcat,(struct obj *));
 static char FDECL(display_pickinv,
 		 (const char *,BOOLEAN_P, long *, BOOLEAN_P));
+static char FDECL(display_pickinv_q,
+		 (const char *,BOOLEAN_P, long *, BOOLEAN_P, const char *, BOOLEAN_P));
 STATIC_DCL boolean FDECL(this_type_only, (struct obj *));
 STATIC_DCL void NDECL(dounpaid);
 STATIC_DCL struct obj *FDECL(find_unpaid,(struct obj *,struct obj **));
@@ -1052,6 +1054,26 @@ register const char *let,*word;
 #ifdef REDO
 		if (in_doagain)
 		    ilet = readchar();
+		else
+#endif
+#ifdef ANDROID /* automenu on ANDROID */
+		if(iflags.automenu) {
+		    ilet = *buf ? '?' : '*';
+			putstr(WIN_MESSAGE, 0, qbuf);
+#ifndef GOLDOBJ
+			if(*buf == '$' && *lets != '$') {
+				memmove(lets + 1, lets, strlen(lets) + 1);
+				*lets='$';
+			}
+#endif
+
+		    ilet = display_pickinv_q(lets, TRUE, allowcnt ? &cnt : (long *)0, TRUE, qbuf, allownone);
+		    if (ilet && allowcnt && cnt >= 0) {
+		    	if(!cnt) prezero = TRUE;
+		    	allowcnt = 2;
+		    }
+		    else cnt = 0;
+		}
 		else
 #endif
 		    ilet = yn_function(qbuf, (char *)0, '\0');
@@ -2253,6 +2275,18 @@ boolean want_reply;
 long* out_cnt;
 boolean want_disp;
 {
+	return display_pickinv_q(lets, want_reply, out_cnt, want_disp, 0, FALSE);
+}
+
+static char
+display_pickinv_q(lets, want_reply, out_cnt, want_disp, quest, allownone)
+register const char *lets;
+boolean want_reply;
+long* out_cnt;
+boolean want_disp;
+const char *quest;
+boolean allownone;
+{
 	struct obj *otmp;
 #ifdef SORTLOOT
 	struct obj **oarray;
@@ -2290,6 +2324,9 @@ boolean want_disp;
 	to here is short circuited away.
 	*/
 	if (!invent && !(flags.perm_invent && !lets && !want_reply)) {
+#if defined(ANDROID) && !defined(GOLDOBJ) 
+	if(!iflags.automenu || !lets || *lets!='$') {
+#endif
 	  if (want_disp) {
 #ifndef GOLDOBJ
 	    pline("Not carrying anything%s.", u.ugold ? " except gold" : "");
@@ -2303,11 +2340,17 @@ boolean want_disp;
 	    dump("  Not carrying anything", u.ugold ? " except gold." : ".");
 #endif
 	    return 0;
+#if defined(ANDROID) && !defined(GOLDOBJ) 
+	}
+#endif
 	}
 
 	/* oxymoron? temporarily assign permanent inventory letters */
 	if (!flags.invlet_constant) reassign();
 
+#ifdef ANDROID /* automenu on ANDROID */
+	if(!iflags.automenu) {
+#endif
 	if (lets && strlen(lets) == 1) {
 	    /* when only one item of interest, use pline instead of menus;
 	       we actually use a fake message-line menu in order to allow
@@ -2332,6 +2375,9 @@ boolean want_disp;
 	    }
 	    return ret;
 	}
+#ifdef ANDROID
+	}
+#endif
 
 #ifdef SORTLOOT
 	/* count the number of items */
@@ -2362,6 +2408,22 @@ boolean want_disp;
 
 	if (want_disp)
 		start_menu(win);
+	
+#if defined(ANDROID) && !defined(GOLDOBJ)
+	// Always add gold pieces when available for Android auto-menu
+    if(iflags.automenu && lets && *lets == '$') {
+		struct obj *gtmp;
+		gtmp = mksobj(GOLD_PIECE, FALSE, FALSE);
+		gtmp->quan = u.ugold;
+		gtmp->owt = weight(gtmp);
+		any.a_void = 0;		/* zero */
+		add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, 0, 0, iflags.menu_headings, "Coins", MENU_UNSELECTED);
+	    any.a_char = '$';
+    	add_menu(win, obj_to_glyph(gtmp), u.ugold, &any, '$', 0, ATR_NONE, doname(gtmp), MENU_UNSELECTED);
+    	dealloc_obj(gtmp);
+    }
+#endif
+    
 nextclass:
 	classcount = 0;
 	any.a_void = 0;		/* set all bits to zero */
@@ -2422,6 +2484,18 @@ nextclass:
 		}
 #endif
 	}
+#ifdef ANDROID
+	if(iflags.automenu && lets) {
+		any.a_void = 0;		/* zero */
+		add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, 0, 0, iflags.menu_headings, "Special", MENU_UNSELECTED);
+		if(allownone) {
+			any.a_char = '-';
+			add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, '-', 0, ATR_NONE, "(nothing)", MENU_UNSELECTED);
+		}
+	    any.a_char = '*';
+	    add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, '*', 0, ATR_NONE, "(more)", MENU_UNSELECTED);		
+	}
+#endif
 #ifdef SORTLOOT
 	free(oarray);
 #endif
@@ -2923,8 +2997,14 @@ boolean picked_some;
 	    if (dfeature) pline("%s", fbuf);
 	    read_engr_at(u.ux, u.uy); /* Eric Backus */
 	    There("are %s%s objects here.",
-		  (obj_cnt <= 10) ? "several" : "many",
-		  picked_some ? " more" : "");
+#ifdef ANDROID
+	      (obj_cnt == 2) ? "two" : (
+#endif
+		  (obj_cnt <= 10) ? "several" : "many"
+#ifdef ANDROID
+				  )
+#endif
+		 , picked_some ? " more" : "");
 	} else if (!otmp->nexthere) {
 	    /* only one object */
 	    if (dfeature) pline("%s", fbuf);

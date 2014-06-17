@@ -24,6 +24,11 @@ extern const struct percent_color_option *hp_colors;
 extern const struct percent_color_option *pw_colors;
 extern const struct text_color_option *text_colors;
 
+#ifdef ANDROID
+void FDECL(and_set_health_color, (struct color_option));
+void NDECL(and_bot_updated);
+#endif
+
 struct color_option
 text_color_of(text, color_options)
 const char *text;
@@ -74,7 +79,7 @@ void
 start_color_option(color_option)
 struct color_option color_option;
 {
-#ifdef TTY_GRAPHICS
+#if defined(TTY_GRAPHICS) || defined(ANDROID)
 	int i;
 	if (color_option.color != NO_COLOR)
 		term_start_color(color_option.color);
@@ -88,7 +93,7 @@ void
 end_color_option(color_option)
 struct color_option color_option;
 {
-#ifdef TTY_GRAPHICS
+#if defined(TTY_GRAPHICS) || defined(ANDROID)
 	int i;
 	if (color_option.color != NO_COLOR)
 		term_end_color();
@@ -379,7 +384,9 @@ bot1()
 #endif
 	curs(WIN_STATUS, 1, 0);
 	putstr(WIN_STATUS, 0, newbot1);
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR) || defined(DUMP_LOG)
 	flags.botlx = save_botlx;
+#endif
 }
 
 /* provide the name of the current level for display by various ports */
@@ -429,6 +436,7 @@ bot2()
 	register char *nb;
 	int hp, hpmax;
 	int cap = near_capacity();
+	struct color_option colop;
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
 	int save_botlx = flags.botlx;
 #endif
@@ -453,7 +461,11 @@ bot2()
 	flags.botlx = 0;
 
 	Sprintf(nb = eos(nb), "%d(%d)", hp, hpmax);
-	apply_color_option(percentage_color_of(hp, hpmax, hp_colors), newbot2, 2);
+	colop = percentage_color_of(hp, hpmax, hp_colors);
+#ifdef ANDROID
+	and_set_health_color(colop);
+#endif
+	apply_color_option(colop, newbot2, 2);
 #else
 	Sprintf(nb = eos(nb), " HP:%d(%d)", hp, hpmax);
 #endif
@@ -577,7 +589,9 @@ bot2()
 #endif
 	curs(WIN_STATUS, 1, 1);
 	putstr(WIN_STATUS, 0, newbot2);
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR) || defined(DUMP_LOG)
 	flags.botlx = save_botlx;
+#endif
 }
 
 void
@@ -586,6 +600,9 @@ bot()
 	bot1();
 	bot2();
 	flags.botl = flags.botlx = 0;
+#ifdef ANDROID
+	and_bot_updated();
+#endif
 }
 
 /*botl.c*/

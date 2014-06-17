@@ -671,10 +671,17 @@ static glyph_t utf8_graphics[MAXPCHARS] = {
 	g_FILLER(S_throne),
 	g_FILLER(S_sink),
 	0x00b6,	/* S_fountain:	PILCROW SIGN */
+#ifdef ANDROID
+	0x2248,	/* S_pool:	TRIPLE TILDE */
+	0x00b7,	/* S_ice:	MIDDLE DOT */
+	0x2248,	/* S_bog:	TRIPLE TILDE */
+	0x2248,	/* S_lava:	TRIPLE TILDE */
+#else
 	0x224b,	/* S_pool:	TRIPLE TILDE */
 	0x00b7,	/* S_ice:	MIDDLE DOT */
 	0x224b,	/* S_bog:	TRIPLE TILDE */
 	0x224b,	/* S_lava:	TRIPLE TILDE */
+#endif
 	0x00b7,	/* S_vodbridge:	MIDDLE DOT */
 	0x00b7,	/* S_hodbridge:	MIDDLE DOT */
 	g_FILLER(S_vcdbridge),
@@ -976,7 +983,11 @@ boolean is_rlevel;
 		&& !iflags.grmode
 #  endif
 		)
-	    monsyms[S_HUMAN] = 0x01; /* smiley face */
+#ifdef ANDROID
+		monsyms[S_HUMAN] = '@';
+#else
+	monsyms[S_HUMAN] = 0x01; /* smiley face */
+#endif
 # endif
 	for (i = 0; i < MAXPCHARS; i++)
 	    showsyms[i] = defsyms[i].sym;
