@@ -4,11 +4,13 @@
     	<item>Ascii (no tiles)</item>
         <item>Unchozo</item>
         <item>UnDawnHack</item>
+        <item>Geoduck</item>
     </string-array>
     <string-array name="tileValues">
         <item>TTY</item>
         <item>unchozo_32</item>
         <item>undawnhack_32</item>
+        <item>ungeoduck_12x20</item>
     </string-array>
 
     <string-array name="actionNames">
