@@ -182,10 +182,10 @@ public class AmountSelector
 	}
 
 	// ____________________________________________________________________________________
-	public int handleKeyDown(char ch, int nhKey, int keyCode, Set<Modifier> modifiers, int repeatCount, boolean bSoftInput)
+	public KeyEventResult handleKeyDown(char ch, int nhKey, int keyCode, Set<Modifier> modifiers, int repeatCount, boolean bSoftInput)
 	{
 		if(mRoot == null)
-			return 0;
+			return KeyEventResult.IGNORED;
 
 		switch(keyCode)
 		{
@@ -194,9 +194,9 @@ public class AmountSelector
 		break;
 
 		default:
-			return 2;// let system handle
+			return KeyEventResult.RETURN_TO_SYSTEM;
 		}
-		return 1;
+		return KeyEventResult.HANDLED;
 	}
 
 	public void dismiss(int amount)

@@ -59,10 +59,10 @@ public class NH_Question
 	}
 
 	// ____________________________________________________________________________________
-	public int handleKeyDown(char ch, int nhKey, int keyCode, Set<Modifier> modifiers, int repeatCount, boolean bSoftInput)
+	public KeyEventResult handleKeyDown(char ch, int nhKey, int keyCode, Set<Modifier> modifiers, int repeatCount, boolean bSoftInput)
 	{
 		if(mUI == null)
-			return 0;
+			return KeyEventResult.IGNORED;
 		return mUI.handleKeyDown(ch, nhKey, keyCode, modifiers, repeatCount, bSoftInput);
 	}
 	
@@ -164,10 +164,10 @@ public class NH_Question
 		};
 		
 		// ____________________________________________________________________________________
-		public int handleKeyDown(char ch, int nhKey, int keyCode, Set<Modifier> modifiers, int repeatCount, boolean bSoftInput)
+		public KeyEventResult handleKeyDown(char ch, int nhKey, int keyCode, Set<Modifier> modifiers, int repeatCount, boolean bSoftInput)
 		{
 			if(mRoot == null)
-				return 0;
+				return KeyEventResult.IGNORED;
 			
 			switch(keyCode)
 			{
@@ -183,11 +183,11 @@ public class NH_Question
 				if(ch != 0)
 				{
 					select(ch);
-					return 1;
+					return KeyEventResult.HANDLED;
 				}
-				return 2;// let system handle
+				return KeyEventResult.RETURN_TO_SYSTEM;
 			}
-			return 1;
+			return KeyEventResult.HANDLED;
 		}
 
 		// ____________________________________________________________________________________

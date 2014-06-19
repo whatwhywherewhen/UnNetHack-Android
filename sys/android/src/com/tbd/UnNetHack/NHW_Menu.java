@@ -192,7 +192,7 @@ public class NHW_Menu implements NH_Window
 	}
 
 	// ____________________________________________________________________________________
-	public int handleKeyDown(char ch, int nhKey, int keyCode, Set<Input.Modifier> modifiers, int repeatCount, boolean bSoftInput)
+	public KeyEventResult handleKeyDown(char ch, int nhKey, int keyCode, Set<Modifier> modifiers, int repeatCount, boolean bSoftInput)
 	{
 		return mUI.handleKeyDown(ch, nhKey, keyCode, modifiers, repeatCount, bSoftInput);
 	}
@@ -242,7 +242,7 @@ public class NHW_Menu implements NH_Window
 			mContext = context;
 		}
 
-		public int handleKeyDown(char ch, int nhKey, int keyCode, Set<Modifier> modifiers, int repeatCount, boolean bSoftInput)
+		public KeyEventResult handleKeyDown(char ch, int nhKey, int keyCode, Set<Modifier> modifiers, int repeatCount, boolean bSoftInput)
 		{
 			if(mAmountSelector != null)
 				return mAmountSelector.handleKeyDown(ch, nhKey, keyCode, modifiers, repeatCount, bSoftInput);
@@ -253,7 +253,7 @@ public class NHW_Menu implements NH_Window
 				keyCode = KeyEvent.KEYCODE_PAGE_DOWN;
 
 			if(!isShowing() || keyCode < 0)
-				return 0;
+				return KeyEventResult.IGNORED;
 
 			if(mType == Type.Text)
 			{
@@ -275,9 +275,9 @@ public class NHW_Menu implements NH_Window
 				break;
 
 				default:
-					return 2;
+					return KeyEventResult.RETURN_TO_SYSTEM;
 				}
-				return 1;
+				return KeyEventResult.HANDLED;
 			}
 			if(mType == Type.Menu)
 			{
@@ -307,7 +307,7 @@ public class NHW_Menu implements NH_Window
 					if(bSoftInput)
 						menuOk();
 					else
-						return 2;// let system handle
+						return KeyEventResult.RETURN_TO_SYSTEM;
 				break;
 					
 				case KeyEvent.KEYCODE_SPACE:
@@ -319,7 +319,7 @@ public class NHW_Menu implements NH_Window
 							toggleItemAt(mListView.getSelectedItemPosition());
 					}
 					else
-						return 2;// let system handle
+						return KeyEventResult.RETURN_TO_SYSTEM;
 				break;
 
 				default:
@@ -328,17 +328,17 @@ public class NHW_Menu implements NH_Window
 						if(getAccelerator(ch) >= 0)
 						{
 							menuOk();
-							return 1;
+							return KeyEventResult.HANDLED;
 						}
-						return 2;// let system handle
+						return KeyEventResult.RETURN_TO_SYSTEM;
 					}
 					else if(menuSelect(ch))
-						return 1;
-					return 2;
+						return KeyEventResult.HANDLED;
+					return KeyEventResult.RETURN_TO_SYSTEM;
 				}
-				return 1;
+				return KeyEventResult.HANDLED;
 			}
-			return 0;
+			return KeyEventResult.IGNORED;
 		}
 
 		// ____________________________________________________________________________________

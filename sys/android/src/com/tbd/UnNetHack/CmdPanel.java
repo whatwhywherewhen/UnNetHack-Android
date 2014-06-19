@@ -75,8 +75,8 @@ public class CmdPanel
 	{
 		if(cmd.length() != 2 || cmd.charAt(0) != '^')
 			return false;
-		char c1 = cmd.charAt(1);
-		return c1 == 'e' || c1 == 'f' || c1 == 'g' || c1 == 'i' || c1 == 'o' || c1 == 'v' || c1 == 'w';
+		char c1 = Character.toLowerCase(cmd.charAt(1));
+		return c1 == 'e' || c1 == 'f' || c1 == 'g' || c1 == 'i' || c1 == 'v' || c1 == 'w';
 	}
 
 	// ____________________________________________________________________________________

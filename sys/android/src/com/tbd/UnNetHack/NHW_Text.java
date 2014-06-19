@@ -4,7 +4,6 @@ import java.util.Set;
 
 import android.app.Activity;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,7 +18,7 @@ public class NHW_Text implements NH_Window
 	private SpannableStringBuilder mBuilder;
 	private UI mUI;
 	private int mWid;
-	
+
 	// ____________________________________________________________________________________
 	public NHW_Text(int wid, Activity context, NetHackIO io)
 	{
@@ -34,17 +33,17 @@ public class NHW_Text implements NH_Window
 	{
 		return "NHW_Text";
 	}
-	
+
 	// ____________________________________________________________________________________
 	public void setContext(Activity context)
 	{
 		mUI = new UI(context);
-		if(mIsVisible)
+		if (mIsVisible)
 			mUI.showInternal();
 		else
 			mUI.hideInternal();
 	}
-	
+
 	// ____________________________________________________________________________________
 	public void clear()
 	{
@@ -64,7 +63,7 @@ public class NHW_Text implements NH_Window
 	// ____________________________________________________________________________________
 	public void printString(int attr, String str, int append, int color)
 	{
-		if(mBuilder.length() > 0)
+		if (mBuilder.length() > 0)
 			mBuilder.append('\n');
 		mBuilder.append(TextAttr.style(str, attr));
 		mUI.update();
@@ -72,7 +71,8 @@ public class NHW_Text implements NH_Window
 
 	// ____________________________________________________________________________________
 	@Override
-	public void setCursorPos(int x, int y) {
+	public void setCursorPos(int x, int y)
+	{
 	}
 
 	// ____________________________________________________________________________________
@@ -89,13 +89,13 @@ public class NHW_Text implements NH_Window
 		mIsVisible = false;
 		mUI.hideInternal();
 	}
-	
+
 	// ____________________________________________________________________________________
 	public void destroy()
 	{
 		close();
 	}
-	
+
 	// ____________________________________________________________________________________
 	public int id()
 	{
@@ -105,7 +105,7 @@ public class NHW_Text implements NH_Window
 	// ____________________________________________________________________________________
 	private void close()
 	{
-		if(mIsBlocking)
+		if (mIsBlocking)
 			mIO.sendKeyCmd(' ');
 		mIsBlocking = false;
 		hide();
@@ -118,9 +118,12 @@ public class NHW_Text implements NH_Window
 	}
 
 	// ____________________________________________________________________________________
-	public int handleKeyDown(char ch, int nhKey, int keyCode, Set<Input.Modifier> modifiers, int repeatCount, boolean bSoftInput)
+	@Override
+	public KeyEventResult handleKeyDown(char ch, int nhKey, int keyCode, Set<Input.Modifier> modifiers, int repeatCount, boolean bSoftInput)
 	{
-		return mUI.handleKeyDown(ch, nhKey, keyCode, modifiers, bSoftInput) ? 1 : 0;
+		if(isVisible())
+			return mUI.handleKeyDown(ch, nhKey, keyCode, modifiers, bSoftInput);
+		return KeyEventResult.IGNORED;
 	}
 
 	// ____________________________________________________________________________________
@@ -128,7 +131,7 @@ public class NHW_Text implements NH_Window
 	{
 		return mIsVisible;
 	}
-	
+
 	// ____________________________________________________________________________________ //
 	// 																						//
 	// ____________________________________________________________________________________ //
@@ -139,14 +142,14 @@ public class NHW_Text implements NH_Window
 
 		public UI(Activity context)
 		{
-			mScroll = (ScrollView)Util.inflate(context, R.layout.textwindow, R.id.dlg_frame);
-			mTextView = (TextView)mScroll.findViewById(R.id.text_view);
+			mScroll = (ScrollView) Util.inflate(context, R.layout.textwindow, R.id.dlg_frame);
+			mTextView = (TextView) mScroll.findViewById(R.id.text_view);
 
 			mTextView.setOnClickListener(new OnClickListener()
 			{
 				public void onClick(View v)
 				{
-					if(isVisible())
+					if (isVisible())
 						close();
 				}
 			});
@@ -157,9 +160,9 @@ public class NHW_Text implements NH_Window
 		// ____________________________________________________________________________________
 		public void update()
 		{
-			if(isVisible())
+			if (isVisible())
 			{
-				if(mBuilder.length() > 0)
+				if (mBuilder.length() > 0)
 					mTextView.setText(mBuilder);
 				else
 					mTextView.setText(null);
@@ -182,7 +185,7 @@ public class NHW_Text implements NH_Window
 		// ____________________________________________________________________________________
 		public void scrollToEnd()
 		{
-			if(isVisible())
+			if (isVisible())
 			{
 				mScroll.post(new Runnable() // gives the view a chance to update itself
 				{
@@ -195,41 +198,44 @@ public class NHW_Text implements NH_Window
 		}
 
 		// ____________________________________________________________________________________
-		public boolean handleKeyDown(char ch, int nhKey, int keyCode, Set<Input.Modifier> modifiers, boolean bSoftInput)
+		public KeyEventResult handleKeyDown(char ch, int nhKey, int keyCode, Set<Input.Modifier> modifiers, boolean bSoftInput)
 		{
-			if(ch == '<')
+			if (ch == '<')
 				keyCode = KeyEvent.KEYCODE_PAGE_UP;
-			else if(ch == '>')
+			else if (ch == '>')
 				keyCode = KeyEvent.KEYCODE_PAGE_DOWN;
 
-			switch(keyCode)
+			switch (keyCode)
 			{
-			case KeyEvent.KEYCODE_ENTER:
-			case KeyEvent.KEYCODE_BACK:
-			case KeyEvent.KEYCODE_DPAD_CENTER:
-				if(isVisible())
-				{
+				case KeyEvent.KEYCODE_ENTER:
+				case KeyEvent.KEYCODE_BACK:
+					//case KeyEvent.KEYCODE_ESCAPE:
+				case KeyEvent.KEYCODE_DPAD_CENTER:
 					close();
-					return true;
-				}
+					break;
 
-			case KeyEvent.KEYCODE_DPAD_UP:
-				mScroll.scrollBy(0, -mTextView.getLineHeight());
-				return true;
-			case KeyEvent.KEYCODE_DPAD_DOWN:
-				mScroll.scrollBy(0, mTextView.getLineHeight());
-				return true;
-			case KeyEvent.KEYCODE_DPAD_LEFT:
-			case KeyEvent.KEYCODE_PAGE_UP:
-				mScroll.pageScroll(View.FOCUS_UP);
-				return true;
-			case KeyEvent.KEYCODE_SPACE:
-			case KeyEvent.KEYCODE_DPAD_RIGHT:
-			case KeyEvent.KEYCODE_PAGE_DOWN:
-				mScroll.pageScroll(View.FOCUS_DOWN);
-				return true;
+				case KeyEvent.KEYCODE_DPAD_UP:
+				case KeyEvent.KEYCODE_VOLUME_UP:
+					mScroll.scrollBy(0, -mTextView.getLineHeight());
+					break;
+
+				case KeyEvent.KEYCODE_DPAD_DOWN:
+				case KeyEvent.KEYCODE_VOLUME_DOWN:
+					mScroll.scrollBy(0, mTextView.getLineHeight());
+					break;
+
+				case KeyEvent.KEYCODE_DPAD_LEFT:
+				case KeyEvent.KEYCODE_PAGE_UP:
+					mScroll.pageScroll(View.FOCUS_UP);
+					break;
+
+				case KeyEvent.KEYCODE_SPACE:
+				case KeyEvent.KEYCODE_DPAD_RIGHT:
+				case KeyEvent.KEYCODE_PAGE_DOWN:
+					mScroll.pageScroll(View.FOCUS_DOWN);
+					break;
 			}
-			return false;
+			return KeyEventResult.HANDLED;
 		}
 	}
 }

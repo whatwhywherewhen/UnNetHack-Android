@@ -5,7 +5,6 @@ import java.util.Set;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.TextUtils;
 import android.view.View;
@@ -60,11 +59,11 @@ public class NHW_Message implements NH_Window {
 	}
 
 	// ____________________________________________________________________________________
-	public int handleKeyDown( char ch, int nhKey, int keyCode, Set<Input.Modifier> modifiers, int repeatCount, boolean bSoftInput ) {
-		int ret;
-		if( isLogShowing() && (ret = mLogView.handleKeyDown(ch, nhKey, keyCode, modifiers, repeatCount, bSoftInput)) > 0 )
+	public KeyEventResult handleKeyDown(char ch, int nhKey, int keyCode, Set<Input.Modifier> modifiers, int repeatCount, boolean bSoftInput) {
+		KeyEventResult ret;
+		if( isLogShowing() && (ret = mLogView.handleKeyDown(ch, nhKey, keyCode, modifiers, repeatCount, bSoftInput)) != KeyEventResult.IGNORED )
 			return ret;
-		return mUI.handleKeyDown(ch, nhKey, keyCode, modifiers, bSoftInput) ? 1 : 0;
+		return mUI.handleKeyDown(ch, nhKey, keyCode, modifiers, bSoftInput) ? KeyEventResult.HANDLED : KeyEventResult.IGNORED;
 	}
 
 	// ____________________________________________________________________________________
