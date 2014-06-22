@@ -4,15 +4,18 @@
 	<PreferenceCategory
 		android:title="Settings">
 
-		<ListPreference
+		<PreferenceScreen
 			android:title="Tileset"
-			android:summary="The visual style of the game world"
-			android:persistent="true"
-			android:key="tileset"
-			android:defaultValue="default_32"
-			android:entries="@array/tileNames"
-			android:entryValues="@array/tileValues"/>
-			
+			android:summary="The visual style of the game world">
+
+			<com.tbd.UnNetHack.TilesetPreference
+				android:title="Tileset"
+				android:key="tilesetPreference"
+				android:summary="The visual style of the game world"
+				android:layout="@layout/tileset_select_menu"/>
+
+		</PreferenceScreen>
+
 		<CheckBoxPreference
 			android:title="Reset command panel"
 			android:summary="Restore the command panel to its original layout"
@@ -42,7 +45,7 @@
 			android:defaultValue="-1"
 			android:entries="@array/actionNames"
 			android:entryValues="@array/actionValues"/>
-			
+
 		<ListPreference
 			android:title="Volume Down Action"
 			android:summary="The action performed when pressing the volume down key"
@@ -51,7 +54,7 @@
 			android:defaultValue="-2"
 			android:entries="@array/actionNames"
 			android:entryValues="@array/actionValues"/>
-			
+
 		<CheckBoxPreference
 			android:title="Travel after pan"
 			android:summary="Invoke the Travel command when a position is clicked after the map has been panned"
@@ -66,14 +69,14 @@
 			android:defaultValue="false"
 			android:key="groupLog"/>
 
-        <CheckBoxPreference
-                android:title="Lock View"
-                android:summary="Do not move the view with the character when the entire map can fit the screen"
-                android:persistent="true"
-                android:defaultValue="true"
-                android:key="lockView"/>
+		<CheckBoxPreference
+			android:title="Lock View"
+			android:summary="Do not move the view with the character when the entire map can fit the screen"
+			android:persistent="true"
+			android:defaultValue="true"
+			android:key="lockView"/>
 
-    </PreferenceCategory>
+	</PreferenceCategory>
 
 	<PreferenceCategory
 		android:title="Advanced">
@@ -123,9 +126,9 @@
 				android:defaultValue="255"
 				android:text=""
 				android:max="255"/>
-			
+
 		</PreferenceScreen>
-		
+
 		<PreferenceScreen
 			android:title="Command panels"
 			android:summary="Configure layout and content of the command panels"
@@ -134,21 +137,21 @@
 			<PreferenceScreen
 				android:title="Panel 0"
 				android:key="panel0">
-				
+
 				<CheckBoxPreference
 					android:title="Active in portrait"
 					android:summary="Whether this panel is active in portrait mode"
 					android:persistent="true"
 					android:defaultValue="true"
 					android:key="pPortActive0"/>
-	
+
 				<CheckBoxPreference
 					android:title="Active in landscape"
 					android:summary="Whether this panel is active in portrait mode"
 					android:persistent="true"
 					android:defaultValue="true"
 					android:key="pLandActive0"/>
-	
+
 				<EditTextPreference
 					android:title="Name"
 					android:summary="Set the name of this panel"
@@ -156,7 +159,7 @@
 					android:defaultValue="Standard panel"
 					android:singleLine="true"
 					android:key="pName0"/>
-	
+
 				<EditTextPreference
 					android:title="Command buttons"
 					android:summary="Space separated list of commands in this panel"
@@ -164,7 +167,7 @@
 					android:defaultValue="... # v 20s . : ; , d e r z Z q t f w x i E Q P R W T o ^d ^p a A ^t D F p ^x ^e ^f ^g ^i ^o ^v ^w ?"
 					android:singleLine="false"
 					android:key="pCmdString0"/>
-	
+
 				<ListPreference
 					android:title="Portrait location"
 					android:summary="The panel's location in portrait mode"
@@ -173,7 +176,7 @@
 					android:defaultValue="3"
 					android:entries="@array/locationNames"
 					android:entryValues="@array/locationValues"/>
-	
+
 				<ListPreference
 					android:title="Landscape location"
 					android:summary="The panel's location in landscape mode"
@@ -182,7 +185,7 @@
 					android:defaultValue="3"
 					android:entries="@array/locationNames"
 					android:entryValues="@array/locationValues"/>
-		
+
 				<com.tbd.UnNetHack.SliderPreference
 					android:title="Opacity"
 					android:summary="The opacity of the panel."
@@ -192,27 +195,27 @@
 					android:defaultValue="255"
 					android:text=""
 					android:max="255"/>
-				
+
 			</PreferenceScreen>
-			
+
 			<PreferenceScreen
 				android:title="Panel 2"
 				android:key="panel1">
-				
+
 				<CheckBoxPreference
 					android:title="Active in portrait"
 					android:summary="Whether this panel is active in portrait mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pPortActive1"/>
-	
+
 				<CheckBoxPreference
 					android:title="Active in landscape"
 					android:summary="Whether this panel is active in portrait mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pLandActive1"/>
-	
+
 				<EditTextPreference
 					android:title="Name"
 					android:summary="Set the name of this panel"
@@ -220,7 +223,7 @@
 					android:defaultValue="Panel 2"
 					android:singleLine="true"
 					android:key="pName1"/>
-	
+
 				<EditTextPreference
 					android:title="Command buttons"
 					android:summary="Space separated list of commands in this panel"
@@ -228,7 +231,7 @@
 					android:defaultValue=""
 					android:singleLine="false"
 					android:key="pCmdString1"/>
-	
+
 				<ListPreference
 					android:title="Portrait location"
 					android:summary="The panel's location in portrait mode"
@@ -237,7 +240,7 @@
 					android:defaultValue="3"
 					android:entries="@array/locationNames"
 					android:entryValues="@array/locationValues"/>
-	
+
 				<ListPreference
 					android:title="Landscape location"
 					android:summary="The panel's location in landscape mode"
@@ -246,7 +249,7 @@
 					android:defaultValue="3"
 					android:entries="@array/locationNames"
 					android:entryValues="@array/locationValues"/>
-		
+
 				<com.tbd.UnNetHack.SliderPreference
 					android:title="Opacity"
 					android:summary="The opacity of the panel."
@@ -256,28 +259,28 @@
 					android:defaultValue="255"
 					android:text=""
 					android:max="255"/>
-				
+
 			</PreferenceScreen>
-			
-			
+
+
 			<PreferenceScreen
 				android:title="Panel 3"
 				android:key="panel2">
-				
+
 				<CheckBoxPreference
 					android:title="Active in portrait"
 					android:summary="Whether this panel is active in portrait mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pPortActive2"/>
-	
+
 				<CheckBoxPreference
 					android:title="Active in landscape"
 					android:summary="Whether this panel is active in portrait mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pLandActive2"/>
-	
+
 				<EditTextPreference
 					android:title="Name"
 					android:summary="Set the name of this panel"
@@ -285,7 +288,7 @@
 					android:defaultValue="Panel 3"
 					android:singleLine="true"
 					android:key="pName2"/>
-	
+
 				<EditTextPreference
 					android:title="Command buttons"
 					android:summary="Space separated list of commands in this panel"
@@ -293,7 +296,7 @@
 					android:defaultValue=""
 					android:singleLine="false"
 					android:key="pCmdString2"/>
-	
+
 				<ListPreference
 					android:title="Portrait location"
 					android:summary="The panel's location in portrait mode"
@@ -302,7 +305,7 @@
 					android:defaultValue="3"
 					android:entries="@array/locationNames"
 					android:entryValues="@array/locationValues"/>
-	
+
 				<ListPreference
 					android:title="Landscape location"
 					android:summary="The panel's location in landscape mode"
@@ -311,7 +314,7 @@
 					android:defaultValue="3"
 					android:entries="@array/locationNames"
 					android:entryValues="@array/locationValues"/>
-		
+
 				<com.tbd.UnNetHack.SliderPreference
 					android:title="Opacity"
 					android:summary="The opacity of the panel."
@@ -321,28 +324,28 @@
 					android:defaultValue="255"
 					android:text=""
 					android:max="255"/>
-						
+
 			</PreferenceScreen>
-			
-			
+
+
 			<PreferenceScreen
 				android:title="Panel 4"
 				android:key="panel3">
-				
+
 				<CheckBoxPreference
 					android:title="Active in portrait"
 					android:summary="Whether this panel is active in portrait mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pPortActive3"/>
-	
+
 				<CheckBoxPreference
 					android:title="Active in landscape"
 					android:summary="Whether this panel is active in portrait mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pLandActive3"/>
-	
+
 				<EditTextPreference
 					android:title="Name"
 					android:summary="Set the name of this panel"
@@ -350,7 +353,7 @@
 					android:defaultValue="Panel 4"
 					android:singleLine="true"
 					android:key="pName3"/>
-	
+
 				<EditTextPreference
 					android:title="Command buttons"
 					android:summary="Space separated list of commands in this panel"
@@ -358,7 +361,7 @@
 					android:defaultValue=""
 					android:singleLine="false"
 					android:key="pCmdString3"/>
-	
+
 				<ListPreference
 					android:title="Portrait location"
 					android:summary="The panel's location in portrait mode"
@@ -367,7 +370,7 @@
 					android:defaultValue="3"
 					android:entries="@array/locationNames"
 					android:entryValues="@array/locationValues"/>
-	
+
 				<ListPreference
 					android:title="Landscape location"
 					android:summary="The panel's location in landscape mode"
@@ -376,7 +379,7 @@
 					android:defaultValue="3"
 					android:entries="@array/locationNames"
 					android:entryValues="@array/locationValues"/>
-		
+
 				<com.tbd.UnNetHack.SliderPreference
 					android:title="Opacity"
 					android:summary="The opacity of the panel."
@@ -386,28 +389,28 @@
 					android:defaultValue="255"
 					android:text=""
 					android:max="255"/>
-						
+
 			</PreferenceScreen>
-			
-			
+
+
 			<PreferenceScreen
 				android:title="Panel 5"
 				android:key="panel4">
-				
+
 				<CheckBoxPreference
 					android:title="Active in portrait"
 					android:summary="Whether this panel is active in portrait mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pPortActive4"/>
-	
+
 				<CheckBoxPreference
 					android:title="Active in landscape"
 					android:summary="Whether this panel is active in portrait mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pLandActive4"/>
-	
+
 				<EditTextPreference
 					android:title="Name"
 					android:summary="Set the name of this panel"
@@ -415,7 +418,7 @@
 					android:defaultValue="Panel 5"
 					android:singleLine="true"
 					android:key="pName4"/>
-	
+
 				<EditTextPreference
 					android:title="Command buttons"
 					android:summary="Space separated list of commands in this panel"
@@ -423,7 +426,7 @@
 					android:defaultValue=""
 					android:singleLine="false"
 					android:key="pCmdString4"/>
-	
+
 				<ListPreference
 					android:title="Portrait location"
 					android:summary="The panel's location in portrait mode"
@@ -432,7 +435,7 @@
 					android:defaultValue="3"
 					android:entries="@array/locationNames"
 					android:entryValues="@array/locationValues"/>
-	
+
 				<ListPreference
 					android:title="Landscape location"
 					android:summary="The panel's location in landscape mode"
@@ -441,7 +444,7 @@
 					android:defaultValue="3"
 					android:entries="@array/locationNames"
 					android:entryValues="@array/locationValues"/>
-		
+
 				<com.tbd.UnNetHack.SliderPreference
 					android:title="Opacity"
 					android:summary="The opacity of the panel."
@@ -451,28 +454,28 @@
 					android:defaultValue="255"
 					android:text=""
 					android:max="255"/>
-						
+
 			</PreferenceScreen>
-			
-			
+
+
 			<PreferenceScreen
 				android:title="Panel 6"
 				android:key="panel5">
-				
+
 				<CheckBoxPreference
 					android:title="Active in portrait"
 					android:summary="Whether this panel is active in portrait mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pPortActive5"/>
-	
+
 				<CheckBoxPreference
 					android:title="Active in landscape"
 					android:summary="Whether this panel is active in portrait mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pLandActive5"/>
-	
+
 				<EditTextPreference
 					android:title="Name"
 					android:summary="Set the name of this panel"
@@ -480,7 +483,7 @@
 					android:defaultValue="Panel 6"
 					android:singleLine="true"
 					android:key="pName5"/>
-	
+
 				<EditTextPreference
 					android:title="Command buttons"
 					android:summary="Space separated list of commands in this panel"
@@ -488,7 +491,7 @@
 					android:defaultValue=""
 					android:singleLine="false"
 					android:key="pCmdString5"/>
-	
+
 				<ListPreference
 					android:title="Portrait location"
 					android:summary="The panel's location in portrait mode"
@@ -497,7 +500,7 @@
 					android:defaultValue="3"
 					android:entries="@array/locationNames"
 					android:entryValues="@array/locationValues"/>
-	
+
 				<ListPreference
 					android:title="Landscape location"
 					android:summary="The panel's location in landscape mode"
@@ -506,7 +509,7 @@
 					android:defaultValue="3"
 					android:entries="@array/locationNames"
 					android:entryValues="@array/locationValues"/>
-		
+
 				<com.tbd.UnNetHack.SliderPreference
 					android:title="Opacity"
 					android:summary="The opacity of the panel."
@@ -516,15 +519,15 @@
 					android:defaultValue="255"
 					android:text=""
 					android:max="255"/>
-						
+
 			</PreferenceScreen>
-			
+
 		</PreferenceScreen>
-		
+
 		<com.tbd.UnNetHack.EditFilePreference
 			android:title="Edit options file"
 			android:summary="Manually specify options in 'defaults.nh'"/>
-	
+
 	</PreferenceCategory>
 
 	<PreferenceCategory

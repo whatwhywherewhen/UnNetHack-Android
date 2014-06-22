@@ -1149,7 +1149,8 @@ void and_nhbell()
 int and_doprev_message()
 {
 	//debuglog("and_doprev_message");
-	JNICallV(jShowLog, 0);
+	JNICallV(jShowLog, 1);
+	and_nhgetch();
 	return 0;
 }
 

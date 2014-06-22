@@ -1,9 +1,13 @@
 package com.tbd.UnNetHack;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.widget.Toast;
 
 public class Tileset
 {
@@ -13,59 +17,99 @@ public class Tileset
 	private int mTileH;
 	private String mTilesetName = "";
 	private int mnCols;
+	private Context mContext;
 
 	// ____________________________________________________________________________________
-	public Tileset()
+	public Tileset(UnNetHack context)
 	{
+		mContext = context;
 	}
-	
+
 	// ____________________________________________________________________________________
-	public void updateTileset(String tilesetName, Resources r)
+	public void setContext(Context context)
 	{
-		if(mTilesetName.equals(tilesetName))
-			return;
+		mContext = context;
+	}
+
+	// ____________________________________________________________________________________
+	public void updateTileset(SharedPreferences prefs, Resources r)
+	{
+		String tilesetName = prefs.getString("tileset", "TTY");
 
 		boolean TTY = tilesetName.equals("TTY");
-		
+		int tileW = prefs.getInt("tileW", 32);
+		int tileH = prefs.getInt("tileH", 32);
+
+		if(mTilesetName.equals(tilesetName) && tileW == mTileW && tileH == mTileH)
+			return;
+		mTilesetName = tilesetName;
+
 		if(!TTY)
 		{
-			int id = r.getIdentifier(tilesetName, "drawable", "com.tbd.UnNetHack");
+			mTileW = tileW;
+			mTileH = tileH;
 
-			if(id > 0)
-			{
-				mTilesetName = tilesetName;
-				
-				BitmapDrawable bmpDrawable = (BitmapDrawable)r.getDrawable(id);
-				mBitmap = bmpDrawable.getBitmap();
-				bmpDrawable = (BitmapDrawable)r.getDrawable(R.drawable.overlays);
-				mOverlay = bmpDrawable.getBitmap();
-				if(tilesetName.endsWith("32"))
-				{
-					mTileW = 32;
-					mTileH = 32;
-				}
-				else
-				{
-					mTileW = 12;
-					mTileH = 20;
-				}
-				
-				if(mBitmap == null || mOverlay == null)
-					TTY = true;
-				else
-					mnCols = mBitmap.getWidth() / mTileW;
-			}
+			if(prefs.getBoolean("customTiles", false))
+				loadFromFile(tilesetName, prefs);
 			else
+				loadFromResources(tilesetName, r);
+
+			BitmapDrawable bmpDrawable = (BitmapDrawable)r.getDrawable(R.drawable.overlays);
+			mOverlay = bmpDrawable.getBitmap();
+
+			if(mBitmap == null || mOverlay == null)
 				TTY = true;
+			else
+				mnCols = mBitmap.getWidth() / mTileW;
 		}
 		
 		if(TTY)
 		{
-			mTilesetName = tilesetName;
-			mBitmap = null;
+			clearBitmap();
 			mTileW = 0;
 			mTileH = 0;
 			mnCols = 0;
+		}
+	}
+
+	// ____________________________________________________________________________________
+	private void clearBitmap()
+	{
+		if(mBitmap != null)
+			mBitmap.recycle();
+		mBitmap = null;
+	}
+
+	// ____________________________________________________________________________________
+	private void loadFromFile(String tilesetName, SharedPreferences prefs)
+	{
+		clearBitmap();
+		try
+		{
+			mBitmap = BitmapFactory.decodeFile(tilesetName);
+			if(mBitmap == null)
+				Toast.makeText(mContext, "Error loading tileset " + tilesetName, Toast.LENGTH_LONG).show();
+		}
+		catch(Exception e)
+		{
+			Toast.makeText(mContext, "Error loading " + tilesetName + ": " + e.toString(), Toast.LENGTH_LONG).show();
+		}
+		catch(OutOfMemoryError e)
+		{
+			Toast.makeText(mContext, "Error loading " + tilesetName + ": Out of memory", Toast.LENGTH_LONG).show();
+		}
+	}
+
+	// ____________________________________________________________________________________
+	private void loadFromResources(String tilesetName, Resources r)
+	{
+		int id = r.getIdentifier(tilesetName, "drawable", "com.tbd.UnNetHack");
+
+		clearBitmap();
+		if(id > 0)
+		{
+			BitmapDrawable bmpDrawable = (BitmapDrawable) r.getDrawable(id);
+			mBitmap = bmpDrawable.getBitmap();
 		}
 	}
 
@@ -82,20 +126,6 @@ public class Tileset
 		int y = iRow * mTileH;
 		
 		return (x << 16) | y;
-	}
-	
-	// ____________________________________________________________________________________
-	public Bitmap getTile(int iTile)
-	{
-		if(mBitmap == null)
-			return null;
-		
-		int ofs = getTileBitmapOffset(iTile);
-		
-		int x = ofs >> 16;
-		int y = ofs & 0xffff;		
-		
-		return Bitmap.createBitmap(mBitmap, x, y, mTileW, mTileH);
 	}
 
 	// ____________________________________________________________________________________
@@ -135,4 +165,5 @@ public class Tileset
 	{
 		return mBitmap != null;
 	}
+
 }

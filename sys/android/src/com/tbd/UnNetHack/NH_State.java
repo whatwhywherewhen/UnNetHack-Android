@@ -49,7 +49,7 @@ public class NH_State
 	public NH_State(UnNetHack context)
 	{
 		mIO = new NetHackIO(this);
-		mTileset = new Tileset();
+		mTileset = new Tileset(context);
 		mWindows = new ArrayList<NH_Window>();
 		mGetLine = new NH_GetLine(mIO, this);
 		mQuestion = new NH_Question(mIO, this);
@@ -76,9 +76,9 @@ public class NH_State
 		mMessage.setContext(context);
 		mStatus.setContext(context);
 		mCmdPanelLayout.setContext(context, this);
-		mDPad.setContext(context)
-		;
+		mDPad.setContext(context);
 		mMap.setContext(context);
+		mTileset.setContext(context);
 	}
 
 	// ____________________________________________________________________________________
@@ -133,8 +133,8 @@ public class NH_State
 		if(mMode == CmdMode.Panel)
 			mCmdPanelLayout.show();
 
-		String tilesetName = prefs.getString("tileset", "TTY");
-		mTileset.updateTileset(tilesetName, mContext.getResources());
+		mTileset.updateTileset(prefs, mContext.getResources());
+		mMap.updateZoomLimits();
 
 		boolean bAutoMenu = prefs.getBoolean("automenu", true);
 		mIO.sendFlags(bAutoMenu);
