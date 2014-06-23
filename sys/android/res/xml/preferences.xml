@@ -17,6 +17,13 @@
 		</PreferenceScreen>
 
 		<CheckBoxPreference
+			android:title="Fallback Renderer"
+			android:summary="Check this if you experience rendering problems"
+			android:persistent="true"
+			android:defaultValue="false"
+			android:key="fallbackRenderer"/>
+
+		<CheckBoxPreference
 			android:title="Reset command panel"
 			android:summary="Restore the command panel to its original layout"
 			android:persistent="true"
