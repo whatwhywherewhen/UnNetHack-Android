@@ -13,6 +13,7 @@
 	<application
 		android:label="UnNetHack"
 		android:icon="@drawable/icon"
+		android:largeHeap="true"
 		android:debuggable="false"
 		android:theme="@android:style/Theme"
 		android:allowBackup="true">
