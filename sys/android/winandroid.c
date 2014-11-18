@@ -111,10 +111,9 @@ static boolean quit_if_possible;
 jbyteArray create_bytearray(const char* str)
 {
 	int len = str ? strlen(str) : 0;
-	jbyteArray a = (*jEnv)->NewByteArray(jEnv, len);
-	jbyte* e = (*jEnv)->GetByteArrayElements(jEnv, a, 0);
-	while(len--)
-		*e++ = *str++;
+	jbyteArray a = (*jEnv)->NewByteArray(jEnv, len*1);
+	jbyte* e = (jbyte*)(*jEnv)->GetByteArrayElements(jEnv, a, 0);
+	memcpy(e, str, len);
 	(*jEnv)->ReleaseByteArrayElements(jEnv, a, e, 0);
 	return a;
 	// return (*jEnv)->NewStringUTF(jEnv, str);
@@ -687,7 +686,6 @@ void and_putstr_ex(winid wid, int attr, const char *str, int append)
 {
 	jbyteArray jstr = create_bytearray(str);
 	if(wid == NHW_STATUS) {
-		//debuglog("st: %d %d %d", flags.botlx, flags.botl, append);
 		if(flags.botlx)
 			append = 0;
 		else
@@ -704,6 +702,8 @@ void and_putstr_ex(winid wid, int attr, const char *str, int append)
 
 void and_putstr(winid wid, int attr, const char *str)
 {
+		debuglog("st (%s): %d %d", str, flags.botlx, flags.botl);
+
 	and_putstr_ex(wid, attr, str, 0);
 }
 
@@ -862,6 +862,7 @@ int and_select_menu_r(winid wid, int how, MENU_ITEM_P **selected, int reentry)
 	int i, n;
 	jintArray a;
 	jint* p;
+	jint* q;
 
 	//debuglog("and_select_menu");
 
@@ -879,14 +880,14 @@ int and_select_menu_r(winid wid, int how, MENU_ITEM_P **selected, int reentry)
 	{
 		n >>= 1;
 
-		p = (*jEnv)->GetIntArrayElements(jEnv, a, 0);
+		q = p = (*jEnv)->GetIntArrayElements(jEnv, a, 0);
 		*selected = (MENU_ITEM_P*)malloc(sizeof(MENU_ITEM_P) * n);
 		for(i = 0; i < n; i++)
 		{
 			(*selected)[i].item.a_int = *p++;
 			(*selected)[i].count = *p++;
 		}
-		(*jEnv)->ReleaseIntArrayElements(jEnv, a, p, 0);
+		(*jEnv)->ReleaseIntArrayElements(jEnv, a, q, 0);
 	}
 	else if(n == 1)
 	{
