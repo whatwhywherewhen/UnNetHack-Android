@@ -154,7 +154,7 @@
 
 				<CheckBoxPreference
 					android:title="Active in landscape"
-					android:summary="Whether this panel is active in portrait mode"
+					android:summary="Whether this panel is active in landscape mode"
 					android:persistent="true"
 					android:defaultValue="true"
 					android:key="pLandActive0"/>
@@ -218,7 +218,7 @@
 
 				<CheckBoxPreference
 					android:title="Active in landscape"
-					android:summary="Whether this panel is active in portrait mode"
+					android:summary="Whether this panel is active in landscape mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pLandActive1"/>
@@ -283,7 +283,7 @@
 
 				<CheckBoxPreference
 					android:title="Active in landscape"
-					android:summary="Whether this panel is active in portrait mode"
+					android:summary="Whether this panel is active in landscape mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pLandActive2"/>
@@ -348,7 +348,7 @@
 
 				<CheckBoxPreference
 					android:title="Active in landscape"
-					android:summary="Whether this panel is active in portrait mode"
+					android:summary="Whether this panel is active in landscape mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pLandActive3"/>
@@ -413,7 +413,7 @@
 
 				<CheckBoxPreference
 					android:title="Active in landscape"
-					android:summary="Whether this panel is active in portrait mode"
+					android:summary="Whether this panel is active in landscape mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pLandActive4"/>
@@ -478,7 +478,7 @@
 
 				<CheckBoxPreference
 					android:title="Active in landscape"
-					android:summary="Whether this panel is active in portrait mode"
+					android:summary="Whether this panel is active in landscape mode"
 					android:persistent="true"
 					android:defaultValue="false"
 					android:key="pLandActive5"/>
