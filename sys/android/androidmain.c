@@ -154,7 +154,7 @@ int UnNetHackMain(int argc, char** argv)
 	display_gamewindows();
 
 	LI = 25;
-	CO = 80;
+	CO = 180;
 
 	if((fd = restore_saved_game()) >= 0)
 	{
