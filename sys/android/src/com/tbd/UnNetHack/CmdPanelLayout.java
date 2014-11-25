@@ -158,8 +158,6 @@ public class CmdPanelLayout extends FrameLayout
 
 			child.layout(childLeft, childTop, childRight, childBottom);
 		}
-
-		mViewRect.set(parentLeft, parentTop, parentRight, parentBottom);
 	}
 
 	// ____________________________________________________________________________________
