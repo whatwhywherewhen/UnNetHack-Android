@@ -702,8 +702,6 @@ void and_putstr_ex(winid wid, int attr, const char *str, int append)
 
 void and_putstr(winid wid, int attr, const char *str)
 {
-		debuglog("st (%s): %d %d", str, flags.botlx, flags.botl);
-
 	and_putstr_ex(wid, attr, str, 0);
 }
 
