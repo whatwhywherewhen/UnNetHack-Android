@@ -108,6 +108,8 @@ public class MenuItemAdapter extends ArrayAdapter<MenuItem>
 			ic.setEnabled(enabled);
 			tile.setEnabled(enabled);
 			cb.setEnabled(enabled);
+
+			item.setView(v);
 		}
 		return v;
 	}
