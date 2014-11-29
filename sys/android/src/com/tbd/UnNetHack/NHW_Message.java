@@ -80,13 +80,6 @@ public class NHW_Message implements NH_Window {
 	}
 
 	// ____________________________________________________________________________________
-	private int getOldestIndex() {
-		if( mLogCount <= MaxLog )
-			return 0;
-		return getIndex(mLogCount + 1);
-	}
-
-	// ____________________________________________________________________________________
 	@Override
 	public void printString( int attr, String str, int append, int color ) {
 		mCurrentIdx = getIndex(mLogCount - 1);
@@ -163,11 +156,6 @@ public class NHW_Message implements NH_Window {
 	public void destroy() {
 		mIsVisible = false;
 		mUI.hideInternal();
-	}
-
-	public boolean isOverflowed()
-	{
-		return mUI.isMoreVisible();
 	}
 
 	// ____________________________________________________________________________________
