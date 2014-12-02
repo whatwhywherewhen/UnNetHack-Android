@@ -249,7 +249,6 @@ public class UnNetHack extends Activity
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event)
 	{
-		Log.print("dispatchKeyEvent: " + event.toString());
 		if(event.getAction() == KeyEvent.ACTION_DOWN)
 		{
 			if(handleKeyDown(event))
@@ -271,7 +270,10 @@ public class UnNetHack extends Activity
 		int keyCode = event.getKeyCode();
 		
 		int fixedCode = Input.keyCodeToAction(keyCode, this);
-		
+
+		if(fixedCode == KeyEvent.KEYCODE_VOLUME_DOWN || fixedCode == KeyEvent.KEYCODE_VOLUME_UP)
+			return false;
+
 		if(fixedCode == KeyAction.Control)
 			mCtrlDown = true;
 		else if(fixedCode == KeyAction.Meta)
@@ -303,7 +305,10 @@ public class UnNetHack extends Activity
 	public boolean onKeyUp(int keyCode, KeyEvent event)
 	{
 		int fixedCode = Input.keyCodeToAction(keyCode, this);
-		
+
+		if(fixedCode == KeyEvent.KEYCODE_VOLUME_DOWN || fixedCode == KeyEvent.KEYCODE_VOLUME_UP)
+			return false;
+
 		if(fixedCode == KeyAction.Control)
 			mCtrlDown = false;
 		else if(fixedCode == KeyAction.Meta)
