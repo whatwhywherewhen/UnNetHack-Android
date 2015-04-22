@@ -2323,7 +2323,11 @@ boolean allownone;
 	an issue if empty checks are done before hand and the call
 	to here is short circuited away.
 	*/
-	if (!invent && !(flags.perm_invent && !lets && !want_reply)) {
+	if (!invent && !(flags.perm_invent && !lets && !want_reply)
+#ifdef ANDROID
+		&& iflags.automenu && !allownone
+#endif
+	) {
 #if defined(ANDROID) && !defined(GOLDOBJ) 
 	if(!iflags.automenu || !lets || *lets!='$') {
 #endif
