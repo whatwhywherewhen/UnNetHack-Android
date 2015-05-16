@@ -521,9 +521,9 @@ public class NH_State
 	}
 
 	// ____________________________________________________________________________________
-	public boolean expectsDirection()
+	public boolean isDPadVisible()
 	{
-		return mIsDPadActive;
+		return mDPad.isVisible();
 	}
 
 	// ____________________________________________________________________________________
