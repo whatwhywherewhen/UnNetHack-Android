@@ -445,7 +445,7 @@ typedef long glyph_t;
 
 #define DUNGEON_GROWTH /* Makes the dungeons feel a bit more living - Pasi Kallinen*/
 /*#define GOLDOBJ */	/* Gold is kept on obj chains - Helge Hafting */
-/*#define AUTOPICKUP_EXCEPTIONS */ /* exceptions to autopickup */
+#define AUTOPICKUP_EXCEPTIONS /* exceptions to autopickup */
 #define DUMP_LOG        /* Dump game end information to a file */
 /* #define DUMP_FN "/tmp/%n.nh" */      /* Fixed dumpfile name, if you want
                                          * to prevent definition by users */
