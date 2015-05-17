@@ -530,6 +530,12 @@ public class NH_State
 	}
 
 	// ____________________________________________________________________________________
+	public boolean expectsDirection()
+	{
+		return mIsDPadActive;
+	}
+
+	// ____________________________________________________________________________________
 	public boolean isDPadVisible()
 	{
 		return mDPad.isVisible();
@@ -620,12 +626,12 @@ public class NH_State
 				mKeyboard.hide();
 				if(mIsDPadActive)
 				{
-					mDPad.setVisible(true);
+					mDPad.showDirectional(true);
 					mCmdPanelLayout.hide();
 				}
 				else
 				{
-					mDPad.setVisible(false);
+					mDPad.showDirectional(false);
 					mCmdPanelLayout.show();
 				}
 			}
