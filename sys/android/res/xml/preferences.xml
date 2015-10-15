@@ -533,6 +533,60 @@
 
 		</PreferenceScreen>
 
+		<PreferenceScreen
+			android:title="Hearse"
+			android:summary="Allow players to share bones files over the internet">
+
+			<CheckBoxPreference
+				android:title="Enable Hearse"
+				android:summary="Bones sharing. Don't use Hearse with Wizard Mode bones"
+				android:persistent="true"
+				android:key="hearseEnable"
+				android:defaultValue="false"/>
+
+			<EditTextPreference
+				android:title="Email"
+				android:summary="How Hearse admins can contact you if needed"
+				android:persistent="true"
+				android:defaultValue=""
+				android:singleLine="true"
+				android:key="hearseMail"/>
+
+			<EditTextPreference
+				android:title="Nickname"
+				android:summary="The name displayed on Hearse website"
+				android:persistent="true"
+				android:defaultValue=""
+				android:singleLine="true"
+				android:maxLength="39"
+				android:key="hearseName"/>
+
+			<EditTextPreference
+				android:title="User token"
+				android:summary="You can copy this to keep your identity across multiple devices"
+				android:persistent="true"
+				android:defaultValue=""
+				android:singleLine="true"
+				android:key="hearseID"/>
+
+			<CheckBoxPreference
+				android:title="Keep my bones"
+				android:summary="Default is to delete bones after upload"
+				android:persistent="true"
+				android:defaultValue="false"
+				android:key="hearseKeepUploaded"/>
+
+			<Preference
+				android:summary="Hearse is hosted by Krollmark. Click here to visit the Hearse website">
+
+				<intent
+					android:action="android.intent.action.VIEW"
+					android:data="http://hearse.krollmark.com"/>
+
+			</Preference>
+
+		</PreferenceScreen>
+
 		<com.tbd.UnNetHack.EditFilePreference
 			android:title="Edit options file"
 			android:summary="Manually specify options in 'defaults.nh'"/>

@@ -16,6 +16,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import com.tbd.UnNetHack.Hearse.Hearse;
 
 public class NH_State
 {
@@ -45,6 +46,7 @@ public class NH_State
 	private boolean mControlsVisible;
 	private boolean mNumPad;
 	private boolean mIsMouseLocked;
+	private Hearse mHearse;
 
 	// ____________________________________________________________________________________
 	public NH_State(UnNetHack context)
@@ -92,6 +94,10 @@ public class NH_State
 		updateVisibleState();
 
 		mMap.loadZoomLevel();
+
+		// I have preferences already, might as well pass them in...
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+		mHearse = new Hearse(mContext, prefs, path);
 	}
 
 	// ____________________________________________________________________________________
