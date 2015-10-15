@@ -237,6 +237,14 @@ public class CmdPanelLayout extends FrameLayout
 			editor.remove("showCmdPanel");
 		}
 
+		//
+		boolean forceAddMenu = prefs.getBoolean("forceAddMenu", true);
+		if(forceAddMenu)
+		{
+			editor.putBoolean("forceAddMenu", false);
+			forceAddMenu(prefs, editor);
+		}
+
 		editor.commit();
 
 		ArrayList<Panel> panelCmds = new ArrayList<Panel>();
@@ -375,7 +383,7 @@ public class CmdPanelLayout extends FrameLayout
 	// ____________________________________________________________________________________
 	private void resetPanels(Editor editor)
 	{
-		String s = "... # v 20s . : ; , d e r z Z q t f w x i E Q P R W T o ^d ^p a A ^t D F p ^x ^e ^f ^g ^i ^o ^v ^w ?";
+		String s = "menu ... # v 20s . : ; , d e r z Z q t f w x i E Q P R W T o ^d ^p a A ^t D F p ^x ^e ^f ^g ^i ^o ^v ^w ?";
 		editor.putBoolean("pPortActive0", true);
 		editor.putBoolean("pLandActive0", true);
 		editor.putString("pCmdString0", s);
@@ -388,6 +396,37 @@ public class CmdPanelLayout extends FrameLayout
 			editor.putBoolean("pPortActive" + idx, false);
 			editor.putBoolean("pLandActive" + idx, false);
 		}
+	}
+
+	// ____________________________________________________________________________________
+	private void forceAddMenu(SharedPreferences prefs, Editor editor)
+	{
+		// Add menu command to first non-empty active panel
+
+		// Unless some of them already has it
+		for(int iPanel = 0; iPanel < 6; iPanel++)
+		{
+			if((" " + prefs.getString("pCmdString" + iPanel, "") + " ").contains(" menu "))
+				return;
+		}
+
+		for(int iPanel = 0; iPanel < 6; iPanel++)
+		{
+			String idx = Integer.toString(iPanel);
+			boolean bPortActive = prefs.getBoolean("pPortActive" + idx, false);
+			boolean bLandActive = prefs.getBoolean("pLandActive" + idx, false);
+			if(bPortActive || bLandActive)
+			{
+				String cmds = prefs.getString("pCmdString" + idx, "");
+				if(cmds.length() > 0)
+				{
+					cmds = "menu " + cmds;
+					editor.putString("pCmdString" + idx, cmds);
+					break;
+				}
+			}
+		}
+
 	}
 
 	// ____________________________________________________________________________________

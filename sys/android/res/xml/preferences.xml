@@ -173,7 +173,7 @@
 					android:title="Command buttons"
 					android:summary="Space separated list of commands in this panel"
 					android:persistent="true"
-					android:defaultValue="... # v 20s . : ; , d e r z Z q t f w x i E Q P R W T o ^d ^p a A ^t D F p ^x ^e ^f ^g ^i ^o ^v ^w ?"
+					android:defaultValue="menu ... # v 20s . : ; , d e r z Z q t f w x i E Q P R W T o ^d ^p a A ^t D F p ^x ^e ^f ^g ^i ^o ^v ^w ?"
 					android:singleLine="false"
 					android:key="pCmdString0"/>
 
