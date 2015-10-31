@@ -15,25 +15,19 @@
  */
 package com.tbd.UnNetHack;
 
-import java.io.File;
-import java.util.EnumSet;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Debug;
 import android.preference.PreferenceManager;
-import android.view.ContextMenu;
+import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.Window;
-
-import com.tbd.UnNetHack.R;
 import com.tbd.UnNetHack.Input.Modifier;
+
+import java.io.File;
+import java.util.EnumSet;
 
 public class UnNetHack extends Activity
 {
@@ -90,17 +84,7 @@ public class UnNetHack extends Activity
 			nhSaveDir.mkdir();
 
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		if(prefs.getBoolean("firsttime", true))
-		{
-			prefs.edit().putBoolean("firsttime", false).commit();
-			Intent prefsActivity = new Intent(getBaseContext(), Instructions.class);
-			startActivityForResult(prefsActivity, 43);
-		}
-		else
-		{
-			nhState.startNetHack(path.getAbsolutePath());
-		}
+		nhState.startNetHack(path.getAbsolutePath());
 	}
 
 	// ____________________________________________________________________________________
@@ -225,10 +209,6 @@ public class UnNetHack extends Activity
 		if(requestCode == 42)
 		{
 			nhState.preferencesUpdated();
-		}
-		else if(requestCode == 43)
-		{
-			nhState.startNetHack(mAppDir.getAbsolutePath());
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}

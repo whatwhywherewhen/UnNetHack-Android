@@ -36,9 +36,5 @@
 			android:name="Settings"
 			android:label="UnNetHack Settings">
 		</activity>
-		<activity
-			android:name="Instructions"
-			android:label="UnNetHack Instructions">
-		</activity>
 	</application>
 </manifest> 
