@@ -253,14 +253,7 @@ public class TilesetPreference extends Preference implements PreferenceManager.O
 			}
 			if(shouldCommit())
 			{
-				try
-				{
-					editor.apply();
-				}
-				catch(AbstractMethodError unused)
-				{
-					editor.commit();
-				}
+				editor.commit();
 			}
 		}
 	}
