@@ -310,20 +310,5 @@ public class NHW_Message implements NH_Window {
 				}
 			}
 		};
-
-		// ____________________________________________________________________________________
-		/*
-		 * private Runnable mTextUpdater = new Runnable() { public void run() {
-		 * mTextUpdaterRunning = false;
-		 * 
-		 * m_view.setText(""); if(mDispCount > 0) { int iStart = mCurrentIdx -
-		 * mDispCount + 1; for(int i = 0; i < mDispCount && i < 3; i++) {
-		 * LogEntry e = mLog[getIndex(iStart + i)]; if(i > 0)
-		 * m_view.append("\n"); if(e.repeat > 1) m_view.append(new
-		 * SpannedString(TextUtils.concat(e.msg, " (" +
-		 * Integer.toString(e.repeat) + ")"))); else m_view.append(e.msg); }
-		 * if(mDispCount > 3) { mDispCount--; m_view.postDelayed(mTextUpdater,
-		 * 100); mTextUpdaterRunning = true; } } } };
-		 */
 	}
 }
