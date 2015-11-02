@@ -47,6 +47,7 @@ public class NH_State
 	private boolean mNumPad;
 	private boolean mIsMouseLocked;
 	private Hearse mHearse;
+	private SoftKeyboard.KEYBOARD mRegularKeyboard;
 
 	// ____________________________________________________________________________________
 	public NH_State(UnNetHack context)
@@ -168,6 +169,7 @@ public class NH_State
 		if(keyCode == KeyEvent.KEYCODE_BACK && isKeyboardMode())
 		{
 			hideKeyboard();
+			restoreRegularKeyboard();
 			return true;
 		}
 
@@ -213,6 +215,7 @@ public class NH_State
 		{
 			if(repeatCount == 0 && !Util.hasPhysicalKeyboard(mContext))
 			{
+				saveRegularKeyboard();
 				if(mMode != CmdMode.Keyboard)
 					mHideQuickKeyboard = true;
 				showKeyboard();
@@ -247,8 +250,7 @@ public class NH_State
 			{
 				if(mHideQuickKeyboard)
 					hideKeyboard();
-				else
-					setQwertyKeyboard();
+				restoreRegularKeyboard();
 			}
 					
 			mHideQuickKeyboard = false;
@@ -591,9 +593,17 @@ public class NH_State
 	}
 
 	// ____________________________________________________________________________________
-	public void setQwertyKeyboard()
+	private void saveRegularKeyboard()
 	{
-		mKeyboard.setQwertyKeyboard();
+		mRegularKeyboard = mKeyboard.getKeyboard();
+	}
+
+	// ____________________________________________________________________________________
+	private void restoreRegularKeyboard()
+	{
+		if(mRegularKeyboard != null)
+			mKeyboard.setKeyboard(mRegularKeyboard);
+		mRegularKeyboard = null;
 	}
 
 	// ____________________________________________________________________________________
