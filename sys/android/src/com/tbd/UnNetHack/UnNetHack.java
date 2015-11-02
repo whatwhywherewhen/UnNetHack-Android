@@ -35,6 +35,7 @@ public class UnNetHack extends Activity
 	private static File mAppDir;
 	private boolean mCtrlDown;
 	private boolean mMetaDown;
+	private boolean mBackTracking;
 
 	// ____________________________________________________________________________________
 	@Override
@@ -229,27 +230,43 @@ public class UnNetHack extends Activity
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event)
 	{
-		if(event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() != KeyEvent.KEYCODE_BACK)
+		// Handle back key long press manually
+		if(event.getKeyCode() == KeyEvent.KEYCODE_BACK)
+		{
+			if(event.getAction() == KeyEvent.ACTION_DOWN)
+			{
+				if(event.getRepeatCount() == 0)
+				{
+					mBackTracking = true;
+				}
+				else if(mBackTracking && event.isLongPress())
+				{
+					Intent prefsActivity = new Intent(getBaseContext(), Settings.class);
+					startActivityForResult(prefsActivity, 42);
+					mBackTracking = false;
+				}
+			}
+			else if(event.getAction() == KeyEvent.ACTION_UP)
+			{
+				if(mBackTracking && !event.isCanceled())
+				{
+					EnumSet<Modifier> modifiers = Input.modifiersFromKeyEvent(event);
+					handleKeyDown(event.getKeyCode(), event.getUnicodeChar(), event.getRepeatCount(), modifiers);
+				}
+				mBackTracking = false;
+			}
+			return true;
+		}
+		mBackTracking = false;
+
+		if(event.getAction() == KeyEvent.ACTION_DOWN)
 		{
 			EnumSet<Modifier> modifiers = Input.modifiersFromKeyEvent(event);
 			if(handleKeyDown(event.getKeyCode(), event.getUnicodeChar(), event.getRepeatCount(), modifiers))
 				return true;
 		}
-		return super.dispatchKeyEvent(event);
-	}
-	
-	// ____________________________________________________________________________________
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event)
-	{
-		return super.onKeyDown(keyCode, event);
-	}
 
-	// ____________________________________________________________________________________
-	@Override
-	public void onBackPressed() {
-		if(!handleKeyDown(KeyEvent.KEYCODE_BACK, 0, 0, EnumSet.noneOf(Modifier.class)))
-			super.onBackPressed();
+		return super.dispatchKeyEvent(event);
 	}
 
 	// ____________________________________________________________________________________
@@ -282,7 +299,7 @@ public class UnNetHack extends Activity
 			// Prevent default system sound from playing
 			return true;
 		}
-		return false;//super.onKeyDown(keyCode, event);
+		return false;
 	}
 
 	// ____________________________________________________________________________________
