@@ -24,6 +24,7 @@ import android.preference.PreferenceManager;
 import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
+import android.widget.Toast;
 import com.tbd.UnNetHack.Input.Modifier;
 
 import java.io.File;
@@ -266,7 +267,17 @@ public class UnNetHack extends Activity
 				return true;
 		}
 
-		return super.dispatchKeyEvent(event);
+		// Try to catch weird crash that's happened to one user once:
+		// java.lang.IllegalStateException: focus search returned a view that wasn't able to take focus!
+		try
+		{
+			return super.dispatchKeyEvent(event);
+		}
+		catch(IllegalStateException ex)
+		{
+			Toast.makeText(this, "Invalid state! You better Save and restart", Toast.LENGTH_LONG).show();
+			return true;
+		}
 	}
 
 	// ____________________________________________________________________________________
