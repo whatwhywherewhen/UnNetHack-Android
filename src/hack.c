@@ -2767,9 +2767,10 @@ lookaround()
        via telepathy, as it might be over the other end of the level,
        unless the monster is within 5 spaces of us. */
     for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-        if ((canseemon(mtmp) ||
-             (canspotmon(mtmp) &&
-              distmin(u.ux, u.uy, mtmp->mx, mtmp->my) <= 5)) &&
+        if (((canseemon(mtmp) &&
+              (Protection_from_shape_changers ||
+               mtmp->m_ap_type != M_AP_FURNITURE && mtmp->m_ap_type != M_AP_OBJECT)) ||
+             (sensemon(mtmp) && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) <= 5)) &&
             !mtmp->mpeaceful && !mtmp->mtame &&
             mtmp->data->mmove && flags.run != 1) {
             nomul(0, 0);
