@@ -16,26 +16,8 @@ public class MenuItem
 	private Spanned mAccText;
 	private int mCount;
 	private int mMaxCount;
-	private boolean mIsSelected;
 	private View mView;
 
-	public MenuItem(MenuItem item)
-	{
-		mTile = item.mTile;
-		mIdent = item.mIdent;
-		mAccelerator = item.mAccelerator;
-		mGroupacc = item.mGroupacc;
-		mAttr = item.mAttr;
-		mName = item.mName;
-		mText = item.mText;
-		mSubText = item.mSubText;
-		mAccText = item.mAccText;
-		mCount = item.mCount;
-		mMaxCount = item.mMaxCount;
-		mIsSelected = item.mIsSelected;
-	}
-	
-	// ____________________________________________________________________________________
 	public MenuItem(final int tile, final int ident, final int accelerator, final int groupacc, final int attr, final String str, final int selected)
 	{
 		mTile = tile;
@@ -61,7 +43,7 @@ public class MenuItem
 
 		setAcc(mAccelerator);
 		
-		mCount = -1;
+		mCount = selected > 0 ? -1 : 0;
 		mMaxCount = 0;
 		
 		int i;
@@ -74,8 +56,8 @@ public class MenuItem
 		}
 		if(i > 0)
 			mName = mName.substring(i).trim();
-
-		mIsSelected = selected != 0;
+		else
+			mMaxCount = 1;
 	}
 
 	// ____________________________________________________________________________________
@@ -138,8 +120,7 @@ public class MenuItem
 		if(c < 0 || c >= mMaxCount)
 			mCount = -1;
 		else
-			mCount = NHW_Map.clamp(c, 0, mMaxCount);
-		mIsSelected = mCount != 0;
+			mCount = c;
 	}
 
 	// ____________________________________________________________________________________
@@ -155,15 +136,9 @@ public class MenuItem
 	}
 
 	// ____________________________________________________________________________________
-	public void toggle()
-	{
-		mIsSelected = !mIsSelected;
-	}
-
-	// ____________________________________________________________________________________
 	public boolean isSelected()
 	{
-		return mIsSelected;
+		return mCount != 0;
 	}
 
 	// ____________________________________________________________________________________

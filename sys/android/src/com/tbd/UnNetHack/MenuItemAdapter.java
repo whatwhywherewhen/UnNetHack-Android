@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.text.TextUtils.TruncateAt;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,7 +72,7 @@ public class MenuItemAdapter extends ArrayAdapter<MenuItem>
 				st.setVisibility(View.GONE);
 
 			TextView ic = (TextView)v.findViewById(R.id.item_count);
-			if(item.isSelected() && item.getCount() > 0 && item.getCount() < item.getMaxCount())
+			if(item.getCount() > 0)
 				ic.setText(Integer.toString(item.getCount()));
 			else
 				ic.setText("");
