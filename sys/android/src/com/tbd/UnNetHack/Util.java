@@ -9,6 +9,10 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 public class Util
 {
 	// ____________________________________________________________________________________
@@ -84,5 +88,14 @@ public class Util
 		{
 		}
 		return def;
+	}
+
+	// ____________________________________________________________________________________
+	public static void copy(InputStream is, OutputStream os) throws IOException
+	{
+		byte[] buf = new byte[10240];
+		int read;
+		while((read = is.read(buf)) != -1)
+			os.write(buf, 0, read);
 	}
 }
