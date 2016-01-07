@@ -187,7 +187,7 @@ public class UnNetHack extends Activity
 		mMetaDown = false;
 
 		super.onCreateContextMenu(menu, v, menuInfo);
-		nhState.onCreateContextMenu(menu, v, menuInfo);
+		nhState.onCreateContextMenu(menu, v);
 	}
 
 	// ____________________________________________________________________________________

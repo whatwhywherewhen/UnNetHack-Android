@@ -3,10 +3,6 @@ package com.tbd.UnNetHack;
 import java.util.Set;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.text.SpannedString;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -14,15 +10,10 @@ import android.widget.TextView;
 public class NHW_Message implements NH_Window {
 	protected static final int SHOW_MAX_LINES = 3;
 
-	private class LogEntry {
-		public String msg;
-		public int repeat;
-	}
-
 	private NetHackIO mIO;
 	private Activity mContext;
 	private final int MaxLog = 256;
-	private LogEntry[] mLog = new LogEntry[MaxLog];
+	private String[] mLog = new String[MaxLog];
 	private int mCurrentIdx;
 	private int mLogCount;
 	private int mDispCount;
@@ -34,8 +25,6 @@ public class NHW_Message implements NH_Window {
 	// ____________________________________________________________________________________
 	public NHW_Message( Activity context, NetHackIO io ) {
 		mIO = io;
-		for( int i = 0; i < mLog.length; i++ )
-			mLog[i] = new LogEntry();
 		setContext(context);
 	}
 
@@ -86,27 +75,16 @@ public class NHW_Message implements NH_Window {
 
 		if( append < 0 && mLogCount > 0 ) {
 			append++;
-			String l = mLog[mCurrentIdx].msg;
+			String l = mLog[mCurrentIdx];
 			if( append < -l.length() )
 				append = -l.length();
 			l = l.substring(0, l.length() + append);
-			mLog[mCurrentIdx].msg = l + str;
+			mLog[mCurrentIdx] = l + str;
 		} else if( append > 0 && mLogCount > 0 ) {
 			if( str.length() > 0 )
-				mLog[mCurrentIdx].msg = mLog[mCurrentIdx].msg + str;
+				mLog[mCurrentIdx] = mLog[mCurrentIdx] + str;
 		} else {
-			String newMsg = str;
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-			boolean grouping = prefs.getBoolean("groupLog", false);
-			if( grouping && mLogCount > 1 ) {
-				String prev = mLog[mCurrentIdx].msg;
-				if( prev.toString().equals(newMsg.toString()) ) {
-					mLog[mCurrentIdx].repeat++;
-					mDispCount++;
-				} else
-					addMessage(newMsg);
-			} else
-				addMessage(newMsg);
+			addMessage(str);
 		}
 		mUI.update();
 	}
@@ -119,8 +97,7 @@ public class NHW_Message implements NH_Window {
 	// ____________________________________________________________________________________
 	private void addMessage( String newMsg ) {
 		mCurrentIdx = getIndex(mCurrentIdx + 1);
-		mLog[mCurrentIdx].msg = newMsg;
-		mLog[mCurrentIdx].repeat = 1;
+		mLog[mCurrentIdx] = newMsg;
 		mDispCount++;
 		mLogCount++;
 	}
@@ -135,7 +112,7 @@ public class NHW_Message implements NH_Window {
 		StringBuilder line = new StringBuilder();
 		for( int i = nLines - 1; i >= 0; i-- ) {
 			int idx = getIndex(mCurrentIdx - i);
-			line.append(mLog[idx].msg);
+			line.append(mLog[idx]);
 			line.append(' ');
 		}
 		line.append('\n');
@@ -168,7 +145,7 @@ public class NHW_Message implements NH_Window {
 
 		int nLogs = 0;
 		for( int n = 0; n < MaxLog; n++ ) {
-			if( mLog[n].msg != null )
+			if( mLog[n] != null )
 				nLogs++;
 		}
 
@@ -176,23 +153,17 @@ public class NHW_Message implements NH_Window {
 		mLogView.clear();
 		int i = mCurrentIdx + 1;
 		for( int n = 0; n < MaxLog; n++, i++ ) {
-			LogEntry e = mLog[getIndex(i)];
-			String s = e.msg;
+			String s = mLog[getIndex(i)];
 			if( s != null ) {
 				nLogs--;
 				if( highlightNew && nLogs < mDispCount )
 					attr = TextAttr.ATTR_BOLD;
-				if( e.repeat > 1 )
-					mLogView.printString(attr, s + " (" + Integer.toString(e.repeat) + ")", 0, 0xffffffff);
-				else
-					mLogView.printString(attr, s, 0, 0xffffffff);
+				mLogView.printString(attr, s, 0, 0xffffffff);
 			}
 		}
 		mLogView.show(bBlocking);
 		mLogView.scrollToEnd();
-		int disp = Math.min(SHOW_MAX_LINES, mDispCount);
 		clear();
-		mDispCount = disp;
 		mUI.update();
 	}
 
@@ -219,7 +190,6 @@ public class NHW_Message implements NH_Window {
 	private class UI {
 		private TextView m_view;
 		private TextView m_more;
-		private boolean mTextUpdaterRunning;
 
 		// ____________________________________________________________________________________
 		public UI() {
@@ -258,8 +228,7 @@ public class NHW_Message implements NH_Window {
 
 		// ____________________________________________________________________________________
 		public void update() {
-			if( !mTextUpdaterRunning )
-				mTextUpdater.run();
+			updateText();
 			if( mDispCount > SHOW_MAX_LINES ) {
 				m_more.setText("--" + Integer.toString(mDispCount - SHOW_MAX_LINES) + " more--");
 				m_more.setVisibility(View.VISIBLE);
@@ -269,7 +238,7 @@ public class NHW_Message implements NH_Window {
 
 		// ____________________________________________________________________________________
 		public boolean handleKeyDown( char ch, int nhKey, int keyCode, Set<Input.Modifier> modifiers, boolean bSoftInput ) {
-			if( isMoreVisible() && ch == ' ' && !isLogShowing() ) {
+			if(isMoreVisible() && ch == ' ' && !isLogShowing()) {
 				showLog(false);
 				return true;
 			}
@@ -283,32 +252,12 @@ public class NHW_Message implements NH_Window {
 				int lineCount = Math.min(SHOW_MAX_LINES, mDispCount);
 				int iStart = mCurrentIdx - lineCount + 1;
 				for( int i = 0; i < lineCount; i++ ) {
-					LogEntry e = mLog[getIndex(iStart + i)];
+					String msg = mLog[getIndex(iStart + i)];
 					if( i > 0 )
 						m_view.append("\n");
-					if( e.repeat > 1 )
-						m_view.append(new SpannedString(TextUtils.concat(e.msg, " (" + Integer.toString(e.repeat) + ")")));
-					else
-						m_view.append(e.msg);
+					m_view.append(msg);
 				}
 			}
 		}
-
-		// ____________________________________________________________________________________
-		private Runnable mTextUpdater = new Runnable() {
-			private int mLastCount = SHOW_MAX_LINES;
-
-			public void run() {
-				if( mDispCount > mLastCount ) {
-					mTextUpdaterRunning = true;
-					mLastCount = mDispCount;
-					m_view.postDelayed(mTextUpdater, 10);
-				} else {
-					mTextUpdaterRunning = false;
-					mLastCount = SHOW_MAX_LINES;
-					updateText();
-				}
-			}
-		};
 	}
 }

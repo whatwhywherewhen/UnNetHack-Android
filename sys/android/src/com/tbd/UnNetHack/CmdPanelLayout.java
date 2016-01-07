@@ -1,20 +1,16 @@
 package com.tbd.UnNetHack;
 
 import java.util.ArrayList;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Gravity;
+import android.view.*;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
@@ -40,7 +36,6 @@ public class CmdPanelLayout extends FrameLayout
 	private NH_State mState;
 	private boolean mPortraitMode;
 	private boolean mShowPanels = true;
-	private boolean mIsWizard;
 	private Rect mViewRect = new Rect();
 	private View mViewArea;
 
@@ -60,6 +55,107 @@ public class CmdPanelLayout extends FrameLayout
 	public CmdPanelLayout(Context context, AttributeSet attrs, int defStyle)
 	{
 		super(context, attrs, defStyle);
+	}
+
+	// ____________________________________________________________________________________
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		int count = getChildCount();
+
+		int viewWidth = MeasureSpec.getSize(widthMeasureSpec);
+		int viewHeight = MeasureSpec.getSize(heightMeasureSpec);
+
+		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+
+		if(widthMode == MeasureSpec.UNSPECIFIED || heightMode == MeasureSpec.UNSPECIFIED) {
+
+			Point size = new Point();
+			if(android.os.Build.VERSION.SDK_INT >= 13) {
+				mContext.getWindowManager().getDefaultDisplay().getSize(size);
+			} else if(MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.UNSPECIFIED) {
+				size.x = mContext.getWindowManager().getDefaultDisplay().getWidth();
+				size.y = mContext.getWindowManager().getDefaultDisplay().getHeight();
+			}
+
+			if(widthMode == MeasureSpec.UNSPECIFIED)
+				viewWidth = size.x;
+			if(heightMode == MeasureSpec.UNSPECIFIED)
+				viewHeight = size.y;
+		}
+
+		int contentWidth = viewWidth;
+		int contentHeight = viewHeight;
+
+		int paddingWidth = getPaddingLeft() + getPaddingRight();
+		int paddingHeight = getPaddingTop() + getPaddingBottom();
+
+		contentWidth -= paddingWidth;
+		contentHeight -= paddingHeight;
+
+		for(int i = count - 1; i >= 0; i--)
+		{
+			final View child = getChildAt(i);
+
+			if(child.getVisibility() == GONE)
+				continue;
+
+			measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
+
+			final int childWidth = child.getMeasuredWidth();
+			final int childHeight = child.getMeasuredHeight();
+			final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+			final int gravity = lp.gravity;
+
+			if(gravity != -1)
+			{
+				switch(gravity & Gravity.HORIZONTAL_GRAVITY_MASK)
+				{
+					case Gravity.LEFT:
+						if((gravity & Gravity.VERTICAL_GRAVITY_MASK) == Gravity.FILL_VERTICAL)
+							contentWidth -= childWidth;
+						break;
+					case Gravity.RIGHT:
+						if((gravity & Gravity.VERTICAL_GRAVITY_MASK) == Gravity.FILL_VERTICAL)
+							contentWidth -= childWidth;
+						break;
+				}
+
+				switch(gravity & Gravity.VERTICAL_GRAVITY_MASK)
+				{
+					case Gravity.TOP:
+						if((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.FILL_HORIZONTAL)
+							contentHeight -= childHeight;
+						break;
+					case Gravity.BOTTOM:
+						if((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.FILL_HORIZONTAL)
+							contentHeight -= childHeight;
+						break;
+				}
+			}
+
+			if(lp.width == LayoutParams.MATCH_PARENT || lp.height == LayoutParams.MATCH_PARENT)
+			{
+				int childWidthMeasureSpec;
+				int childHeightMeasureSpec;
+
+				if(lp.width == LayoutParams.MATCH_PARENT) {
+					childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(contentWidth - lp.leftMargin - lp.rightMargin, MeasureSpec.EXACTLY);
+				} else {
+					childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec, paddingWidth + lp.leftMargin + lp.rightMargin, lp.width);
+				}
+
+				if(lp.height == LayoutParams.MATCH_PARENT) {
+					childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(contentHeight - lp.topMargin - lp.bottomMargin, MeasureSpec.EXACTLY);
+				} else {
+					childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec, paddingHeight + lp.topMargin + lp.bottomMargin, lp.height);
+				}
+
+				child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+			}
+		}
+
+		setMeasuredDimension(viewWidth, viewHeight);
 	}
 
 	// ____________________________________________________________________________________
@@ -84,7 +180,7 @@ public class CmdPanelLayout extends FrameLayout
 				if(mViewRect.left != parentLeft || mViewRect.right != parentRight || mViewRect.top != parentTop || mViewRect.bottom != parentBottom)
 				{
 					mViewRect.set(parentLeft, parentTop, parentRight, parentBottom);
-					mState.viewAreaCanged(mViewRect);
+					mState.viewAreaChanged(mViewRect);
 				}
 			}
 
@@ -163,7 +259,7 @@ public class CmdPanelLayout extends FrameLayout
 	// ____________________________________________________________________________________
 	public void preferencesUpdated(SharedPreferences prefs)
 	{
-		loadPanels(prefs, false);
+		loadPanels(prefs);
 	}
 
 	// ____________________________________________________________________________________
@@ -210,11 +306,10 @@ public class CmdPanelLayout extends FrameLayout
 		mPortraitMode = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 		mViewArea = findViewById(R.id.viewArea);
 		mViewArea.setVisibility(View.GONE);
-		//loadPanels();
 	}
 
 	// ____________________________________________________________________________________
-	private void loadPanels(SharedPreferences prefs, boolean forcePanelsChanged)
+	private void loadPanels(SharedPreferences prefs)
 	{
 		Editor editor = prefs.edit();
 
@@ -269,7 +364,7 @@ public class CmdPanelLayout extends FrameLayout
 			}
 		}
 
-		if(forcePanelsChanged || panelsChanged(mPanelCmds, panelCmds))
+		if(panelsChanged(mPanelCmds, panelCmds))
 		{
 			Log.print("panels were changed");
 			for(Panel p : mPanelCmds)
@@ -288,7 +383,7 @@ public class CmdPanelLayout extends FrameLayout
 				else
 					panel.landScrollView = createScrollView(panel.lLoc);
 				
-				panel.panel = new CmdPanel(mContext, mState, this, mIsWizard, panel.cmds, panel.opacity);
+				panel.panel = new CmdPanel(mContext, mState, this, panel.cmds, panel.opacity);
 				if(mPortraitMode)
 				{
 					if(mShowPanels && panel.portActive)
@@ -383,7 +478,7 @@ public class CmdPanelLayout extends FrameLayout
 	// ____________________________________________________________________________________
 	private void resetPanels(Editor editor)
 	{
-		String s = "menu ... # v 20s . : ; , d e r z Z q t f w x i E Q P R W T o ^d ^p a A ^t D F p ^x ^e ^f ^g ^i ^o ^v ^w ?";
+		String s = "menu ... # v 20s . : ; , d e r z Z q t f w x i E Q P R W T o ^d ^p a A ^t D F p ^x ^o ?";
 		editor.putBoolean("pPortActive0", true);
 		editor.putBoolean("pLandActive0", true);
 		editor.putString("pCmdString0", s);
@@ -430,22 +525,10 @@ public class CmdPanelLayout extends FrameLayout
 	}
 
 	// ____________________________________________________________________________________
-	public void wizardUpgrade(SharedPreferences prefs)
-	{
-		Log.print("!!! WIZARD UPGRADE !!!");
-		
-		if(!mIsWizard)
-		{
-			mIsWizard = true;
-			loadPanels(prefs, true);
-		}
-	}
-
-	// ____________________________________________________________________________________
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
+	public void onCreateContextMenu(ContextMenu menu, View v)
 	{
 		for(Panel p : mPanelCmds)
-			p.panel.onCreateContextMenu(menu, v, menuInfo);
+			p.panel.onCreateContextMenu(menu, v);
 	}
 
 	// ____________________________________________________________________________________

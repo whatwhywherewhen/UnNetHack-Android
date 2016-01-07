@@ -31,13 +31,6 @@
 			android:key="reset"/>
 
 		<CheckBoxPreference
-			android:title="Automenu"
-			android:summary="Aid touch screen interaction by automatically opening menus and dialogs when possible"
-			android:persistent="true"
-			android:defaultValue="true"
-			android:key="automenu"/>
-
-		<CheckBoxPreference
 			android:title="Fullscreen"
 			android:summary="Enable fullscreen mode"
 			android:persistent="true"
@@ -70,13 +63,6 @@
 			android:defaultValue="1"
 			android:entries="@array/travelNames"
 			android:entryValues="@array/travelValues"/>
-
-		<CheckBoxPreference
-			android:title="Group log messages"
-			android:summary="Reduce log verbosity by grouping identical messages"
-			android:persistent="true"
-			android:defaultValue="false"
-			android:key="groupLog"/>
 
 		<CheckBoxPreference
 			android:title="Lock view"
@@ -173,7 +159,7 @@
 					android:title="Command buttons"
 					android:summary="Space separated list of commands in this panel"
 					android:persistent="true"
-					android:defaultValue="menu ... # v 20s . : ; , d e r z Z q t f w x i E Q P R W T o ^d ^p a A ^t D F p ^x ^e ^f ^g ^i ^o ^v ^w ?"
+					android:defaultValue="menu ... # v 20s . : ; , d e r z Z q t f w x i E Q P R W T o ^d ^p a A ^t D F p ^x ^o ?"
 					android:singleLine="false"
 					android:key="pCmdString0"/>
 

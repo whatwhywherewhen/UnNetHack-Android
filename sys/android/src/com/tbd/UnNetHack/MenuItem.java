@@ -1,5 +1,6 @@
 package com.tbd.UnNetHack;
 
+import android.text.SpannableString;
 import android.text.Spanned;
 import android.view.View;
 
@@ -54,7 +55,7 @@ public class MenuItem
 				break;
 			mMaxCount = mMaxCount * 10 + c - '0';
 		}
-		if(i > 0)
+		if(i > 0 && mMaxCount > 0)
 			mName = mName.substring(i).trim();
 		else
 			mMaxCount = 1;
@@ -158,7 +159,7 @@ public class MenuItem
 	{
 		mAccelerator = acc;
 		if(acc != 0)
-			mAccText = TextAttr.style(Character.toString(acc), mAttr);
+			mAccText = new SpannableString(Character.toString(acc));
 		else
 			mAccText = null;
 	}

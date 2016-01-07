@@ -1,19 +1,9 @@
 package com.tbd.UnNetHack;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import android.app.Activity;
-import android.content.Context;
-import android.content.res.AssetFileDescriptor;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
-import android.media.MediaPlayer.OnErrorListener;
-import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Handler;
 import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
 
 public class NetHackIO implements Runnable
@@ -21,7 +11,6 @@ public class NetHackIO implements Runnable
 	private Handler mHandler;
 	private Thread mThread;
 	private NH_State mState;
-	private Context mContext;
 	private ConcurrentLinkedQueue<Integer> mCmdQue;
 	private int mNextWinId;
 	private int mMessageWid;
@@ -67,24 +56,12 @@ public class NetHackIO implements Runnable
 	}
 	
 	// ____________________________________________________________________________________
-	public void setContext(Activity context) {
-		mContext = context;
-	}
-
-	// ____________________________________________________________________________________
 	public void start()
 	{
 		if(mThread != null)
 			throw new IllegalStateException();
-		mThread = new Thread(this);
+		mThread = new Thread(this, "nh_thread");
 		mThread.start();
-	}
-
-	// ____________________________________________________________________________________
-	public void sendFlags(boolean bAutoMenu)
-	{
-		mCmdQue.add(FlagCmd);
-		mCmdQue.add(bAutoMenu ? 1 : 0);
 	}
 
 	// ____________________________________________________________________________________
@@ -179,9 +156,9 @@ public class NetHackIO implements Runnable
 	}
 
 	// ____________________________________________________________________________________
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
+	public void onCreateContextMenu(ContextMenu menu, View v)
 	{
-		mState.onCreateContextMenu(menu, v, menuInfo);
+		mState.onCreateContextMenu(menu, v);
 	}
 
 	// ____________________________________________________________________________________
@@ -311,10 +288,6 @@ public class NetHackIO implements Runnable
 		{
 		case SaveStateCmd:
 			SaveNetHackState();
-		break;
-		case FlagCmd:
-			int autoMenu = removeFromQue();
-			SetFlags(autoMenu);
 		break;
 		}
 	}
@@ -797,20 +770,6 @@ public class NetHackIO implements Runnable
 	}
 	
 	// ____________________________________________________________________________________
-	private void setWizardMode()
-	{
-		mHandler.post(new Runnable()
-		{
-			public void run()
-			{
-				mState.setWizardMode();
-			}
-		});
-	}
-	
-	// ____________________________________________________________________________________
 	private native void RunUnNetHack(String path);
 	private native void SaveNetHackState();
-	private native void SetFlags(int bAutoMenu);
-
 }

@@ -209,7 +209,7 @@ public class NHW_Text implements NH_Window
 			{
 				case KeyEvent.KEYCODE_ENTER:
 				case KeyEvent.KEYCODE_BACK:
-					//case KeyEvent.KEYCODE_ESCAPE:
+				case KeyEvent.KEYCODE_ESCAPE:
 				case KeyEvent.KEYCODE_DPAD_CENTER:
 					close();
 					break;
@@ -232,10 +232,24 @@ public class NHW_Text implements NH_Window
 				case KeyEvent.KEYCODE_SPACE:
 				case KeyEvent.KEYCODE_DPAD_RIGHT:
 				case KeyEvent.KEYCODE_PAGE_DOWN:
-					mScroll.pageScroll(View.FOCUS_DOWN);
+					if(isScrolledToBottom())
+						close();
+					else
+						mScroll.pageScroll(View.FOCUS_DOWN);
 					break;
 			}
 			return KeyEventResult.HANDLED;
+		}
+
+		public boolean isScrolledToBottom()
+		{
+			int count = mScroll.getChildCount();
+			if(count > 0) {
+				View view = mScroll.getChildAt(count - 1);
+				if(mScroll.getScrollY() + mScroll.getHeight() >= view.getBottom())
+					return true;
+			}
+			return false;
 		}
 	}
 }

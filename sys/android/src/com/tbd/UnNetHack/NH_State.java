@@ -72,7 +72,6 @@ public class NH_State
 	public void setContext(UnNetHack context)
 	{
 		mContext = context;
-		mIO.setContext(context);
 		for(NH_Window w : mWindows)
 			w.setContext(context);
 		mGetLine.setContext(context);
@@ -144,17 +143,14 @@ public class NH_State
 		mTileset.updateTileset(prefs, mContext.getResources());
 		mMap.updateZoomLimits();
 
-		boolean bAutoMenu = prefs.getBoolean("automenu", true);
-		mIO.sendFlags(bAutoMenu);
-
-		int flag = prefs.getBoolean("fullscreen", false) ? WindowManager.LayoutParams.FLAG_FULLSCREEN : 0;		
+		int flag = prefs.getBoolean("fullscreen", false) ? WindowManager.LayoutParams.FLAG_FULLSCREEN : 0;
 		mContext.getWindow().setFlags(flag, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 	}
 
 	// ____________________________________________________________________________________
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
+	public void onCreateContextMenu(ContextMenu menu, View v)
 	{
-		mCmdPanelLayout.onCreateContextMenu(menu, v, menuInfo);
+		mCmdPanelLayout.onCreateContextMenu(menu, v);
 	}
 
 	// ____________________________________________________________________________________
@@ -668,7 +664,7 @@ public class NH_State
 	}
 
 	// ____________________________________________________________________________________
-	public void viewAreaCanged(Rect viewRect)
+	public void viewAreaChanged(Rect viewRect)
 	{
 		mMap.viewAreaChanged(viewRect);
 	}
@@ -682,13 +678,6 @@ public class NH_State
 	// ____________________________________________________________________________________
 	public boolean isNumPadOn() {
 		return mNumPad;
-	}
-
-	// ____________________________________________________________________________________
-	public void setWizardMode()
-	{
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-		mCmdPanelLayout.wizardUpgrade(prefs);
 	}
 
 	// ____________________________________________________________________________________

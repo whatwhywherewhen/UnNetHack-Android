@@ -496,10 +496,6 @@ static boolean need_redraw; /* for doset() */
 extern boolean colors_changed;	/* in tos.c */
 #endif
 
-#ifdef ANDROID
-	extern boolean autoMenuFromFile;
-#endif
-
 #ifdef VIDEOSHADES
 extern char *shade[3];		  /* in sys/msdos/video.c */
 extern int ttycolors[CLR_MAX];	  /* in sys/msdos/video.c, win/tty/termcap.c */
@@ -3153,12 +3149,6 @@ goodfruit:
 
 			duplicate_opt_detection(boolopt[i].name, 0);
 
-#ifdef ANDROID
-		    if(initial && tfrom_file) {
-		    	if((boolopt[i].addr) == &iflags.automenu)
-		    		autoMenuFromFile = TRUE;
-		    }
-#endif
 #if defined(TERMLIB) || defined(ASCIIGRAPH) || defined(MAC_GRAPHICS_ENV) || defined(CURSES_GRAPHICS)
 			if (FALSE
 # ifdef TERMLIB

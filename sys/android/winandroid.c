@@ -100,7 +100,6 @@ static jmethodID jShowLog;
 static jmethodID jSetUsername;
 static jmethodID jSetNumPadOption;
 static jmethodID jAskName;
-static jmethodID jSetWizardMode;
 
 static boolean quit_if_possible;
 
@@ -128,11 +127,6 @@ void destroy_jobject(jstring jstr)
 #define JNICallV(func, ...) (*jEnv)->CallVoidMethod(jEnv, jAppInstance, func, ## __VA_ARGS__);
 #define JNICallI(func, ...) (*jEnv)->CallIntMethod(jEnv, jAppInstance, func, ## __VA_ARGS__);
 #define JNICallO(func, ...) (*jEnv)->CallObjectMethod(jEnv, jAppInstance, func, ## __VA_ARGS__);
-
-//____________________________________________________________________________________
-
-boolean autoMenuFromFile;
-
 
 //____________________________________________________________________________________
 void Java_com_tbd_UnNetHack_NetHackIO_RunUnNetHack(JNIEnv* env, jobject thiz, jstring path)
@@ -169,13 +163,12 @@ void Java_com_tbd_UnNetHack_NetHackIO_RunUnNetHack(JNIEnv* env, jobject thiz, js
 	jSetUsername = (*jEnv)->GetMethodID(jEnv, jApp, "setUsername", "([B)V");
 	jSetNumPadOption = (*jEnv)->GetMethodID(jEnv, jApp, "setNumPadOption", "(I)V");
 	jAskName = (*jEnv)->GetMethodID(jEnv, jApp, "askName", "(I[Ljava/lang/String;)Ljava/lang/String;");
-	jSetWizardMode = (*jEnv)->GetMethodID(jEnv, jApp, "setWizardMode", "()V");
 
 	if(!(jReceiveKey && jReceivePosKey && jCreateWindow && jClearWindow && jDisplayWindow &&
 			jDestroyWindow && jPutString && jRawPrint && jSetCursorPos && jPrintTile &&
 			jYNFunction && jGetLine && jStartMenu && jAddMenu && jEndMenu && jSelectMenu &&
 			jCliparound && jDelayOutput && jShowDPad && jShowLog && jSetUsername &&
-			jSetNumPadOption && jAskName && jSetWizardMode && jSetHealthColor && jRedrawStatus))
+			jSetNumPadOption && jAskName && jSetHealthColor && jRedrawStatus))
 	{
 		debuglog("baaaaad");
 		return;
@@ -189,16 +182,7 @@ void Java_com_tbd_UnNetHack_NetHackIO_RunUnNetHack(JNIEnv* env, jobject thiz, js
 	params[0] = "unnethack";
 	params[1] = 0;
 
-	autoMenuFromFile = FALSE;
-
 	UnNetHackMain(1, params);
-}
-
-//____________________________________________________________________________________
-void Java_com_tbd_UnNetHack_NetHackIO_SetFlags(JNIEnv* env, jobject thiz, int autoMenu)
-{
-	if(!autoMenuFromFile)
-		iflags.automenu = autoMenu ? TRUE : FALSE;
 }
 
 //____________________________________________________________________________________
@@ -1758,10 +1742,5 @@ void and_preference_update(const char *pref)
 {
 //	debuglog("and_preference_update %s", pref);
 	//genl_preference_update(pref);
-}
-
-void and_set_wizard_mode()
-{
-	JNICallV(jSetWizardMode);
 }
 
