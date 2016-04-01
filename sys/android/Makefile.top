@@ -274,3 +274,4 @@ spotless:
 	( cd util ; $(MAKE) spotless )
 	( cd dat ; $(MAKE) spotless )
 	( cd doc ; $(MAKE) spotless )
+	( rm -f Makefile )

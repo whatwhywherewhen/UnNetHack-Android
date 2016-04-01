@@ -88,7 +88,7 @@ clean:
 
 spotless: clean
 	-rm -f Guidebook Guidebook.ps Guidebook.dvi
+	-rm -f Makefile
 
 maintainer-clean: spotless
 	-rm -f $(DISTRIB)
-#	-rm -f Makefile
