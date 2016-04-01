@@ -107,7 +107,8 @@ public class Tileset
 		clearBitmap();
 		mBitmap = tryLoadBitmap(getLocalTilesetFile().getPath(), false);
 		// Fallback if coming from an old version
-		mBitmap = tryLoadBitmap(tilesetName, true);
+		if(mBitmap == null)
+			mBitmap = tryLoadBitmap(tilesetName, true);
 		if(mBitmap == null)
 			Toast.makeText(mContext, "Error loading custom tileset", Toast.LENGTH_LONG).show();
 	}
