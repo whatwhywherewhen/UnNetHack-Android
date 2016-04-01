@@ -8,14 +8,14 @@ import android.view.View;
 
 public class NetHackIO implements Runnable
 {
-	private Handler mHandler;
-	private Thread mThread;
-	private NH_State mState;
-	private ConcurrentLinkedQueue<Integer> mCmdQue;
+	private final Handler mHandler;
+	private final Thread mThread;
+	private final NH_State mState;
+	private final ConcurrentLinkedQueue<Integer> mCmdQue;
 	private int mNextWinId;
 	private int mMessageWid;
 	private volatile Integer mIsReady = 0;
-	private Object mReadyMonitor = new Object();
+	private final Object mReadyMonitor = new Object();
 
 	// ____________________________________________________________________________________ //
 	// Send commands																		//
@@ -38,6 +38,7 @@ public class NetHackIO implements Runnable
 		mNextWinId = 1;
 		mCmdQue = new ConcurrentLinkedQueue<Integer>();
 		mHandler = new Handler();
+		mThread = new Thread(this, "nh_thread");
 /*		Looper.myQueue().addIdleHandler(new MessageQueue.IdleHandler()
 		{			
 			@Override
@@ -58,9 +59,6 @@ public class NetHackIO implements Runnable
 	// ____________________________________________________________________________________
 	public void start()
 	{
-		if(mThread != null)
-			throw new IllegalStateException();
-		mThread = new Thread(this, "nh_thread");
 		mThread.start();
 	}
 
@@ -142,6 +140,7 @@ public class NetHackIO implements Runnable
 	public void run()
 	{
 		Log.print("start native process");
+
 		try
 		{
 			System.loadLibrary("unnethack");
