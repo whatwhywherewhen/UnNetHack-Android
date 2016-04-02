@@ -136,6 +136,8 @@ public class NH_State
 
 		mCmdPanelLayout.preferencesUpdated(prefs);
 		mDPad.preferencesUpdated(prefs);
+		mStatus.preferencesUpdated(prefs);
+		mMessage.preferencesUpdated(prefs);
 
 		if(mMode == CmdMode.Panel)
 			mCmdPanelLayout.show();

@@ -3,9 +3,9 @@ package com.tbd.UnNetHack;
 import java.util.Set;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.text.SpannableStringBuilder;
 import android.view.View;
-import android.widget.TextView;
 
 public class NHW_Status implements NH_Window
 {
@@ -15,6 +15,7 @@ public class NHW_Status implements NH_Window
 	private UI mUI;
 	private boolean mIsVisible;
 	private int mWid;
+	private int mOpacity;
 
 	// ____________________________________________________________________________________
 	public NHW_Status(Activity context, NetHackIO io)
@@ -120,6 +121,13 @@ public class NHW_Status implements NH_Window
 		return mUI.getHeight();
 	}
 
+	// ____________________________________________________________________________________
+	public void preferencesUpdated(SharedPreferences prefs)
+	{
+		mOpacity = prefs.getInt("statusOpacity", 0);
+		mUI.updateOpacity();
+	}
+
 	// ____________________________________________________________________________________ //
 	// 																						//
 	// ____________________________________________________________________________________ //
@@ -133,6 +141,7 @@ public class NHW_Status implements NH_Window
 			mViews = new AutoFitTextView[2];
 			mViews[0] = (AutoFitTextView)context.findViewById(R.id.nh_stat0);
 			mViews[1] = (AutoFitTextView)context.findViewById(R.id.nh_stat1);
+			updateOpacity();
 		}
 
 		// ____________________________________________________________________________________
@@ -161,6 +170,13 @@ public class NHW_Status implements NH_Window
 		public float getHeight()
 		{
 			return mViews[0].getMinTextSize() * 2;
+		}
+
+		// ____________________________________________________________________________________
+		public void updateOpacity()
+		{
+			mViews[0].setBackgroundColor(mOpacity << 24);
+			mViews[1].setBackgroundColor(mOpacity << 24);
 		}
 	}
 }
