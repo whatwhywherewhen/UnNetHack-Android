@@ -2325,7 +2325,7 @@ boolean allownone;
 	*/
 	if (!invent && !(flags.perm_invent && !lets && !want_reply)
 #ifdef ANDROID
-		&& iflags.automenu && !allownone
+		&& (!iflags.automenu || !allownone)
 #endif
 	) {
 #if defined(ANDROID) && !defined(GOLDOBJ) 
@@ -2497,14 +2497,14 @@ nextclass:
 			add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, '-', 0, ATR_NONE, "(nothing)", MENU_UNSELECTED);
 		}
 	    any.a_char = '*';
-	    add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, '*', 0, ATR_NONE, "(more)", MENU_UNSELECTED);		
+	    add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, '*', 0, ATR_NONE, "(list everything)", MENU_UNSELECTED);
 	}
 #endif
 #ifdef SORTLOOT
 	free(oarray);
 #endif
 	if (want_disp) {
-	end_menu(win, (char *) 0);
+	end_menu(win, (char *) quest);
 
 	n = select_menu(win, want_reply ? PICK_ONE : PICK_NONE, &selected);
 	if (n > 0) {

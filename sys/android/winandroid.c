@@ -129,7 +129,7 @@ void destroy_jobject(jstring jstr)
 #define JNICallO(func, ...) (*jEnv)->CallObjectMethod(jEnv, jAppInstance, func, ## __VA_ARGS__);
 
 //____________________________________________________________________________________
-void Java_com_tbd_UnNetHack_NetHackIO_RunUnNetHack(JNIEnv* env, jobject thiz, jstring path)
+void Java_com_tbd_forkfront_NetHackIO_RunNetHack(JNIEnv* env, jobject thiz, jstring path)
 {
 	char* params[10];
 	const char* pChars;
@@ -153,7 +153,7 @@ void Java_com_tbd_UnNetHack_NetHackIO_RunUnNetHack(JNIEnv* env, jobject thiz, js
 	jYNFunction = (*jEnv)->GetMethodID(jEnv, jApp, "ynFunction", "([B[BI)V");
 	jGetLine = (*jEnv)->GetMethodID(jEnv, jApp, "getLine", "([BIII)Ljava/lang/String;");
 	jStartMenu = (*jEnv)->GetMethodID(jEnv, jApp, "startMenu", "(I)V");
-	jAddMenu = (*jEnv)->GetMethodID(jEnv, jApp, "addMenu", "(IIIIII[BI)V");
+	jAddMenu = (*jEnv)->GetMethodID(jEnv, jApp, "addMenu", "(IIIIII[BII)V");
 	jEndMenu = (*jEnv)->GetMethodID(jEnv, jApp, "endMenu", "(I[B)V");
 	jSelectMenu = (*jEnv)->GetMethodID(jEnv, jApp, "selectMenu", "(III)[I");
 	jCliparound = (*jEnv)->GetMethodID(jEnv, jApp, "cliparound", "(IIII)V");
@@ -210,7 +210,7 @@ boolean SaveAndExit()
 }
 
 //____________________________________________________________________________________
-void Java_com_tbd_UnNetHack_NetHackIO_SaveNetHackState(JNIEnv* env, jobject thiz)
+void Java_com_tbd_forkfront_NetHackIO_SaveNetHackState(JNIEnv* env, jobject thiz)
 {
 	if(!program_state.gameover && program_state.something_worth_saving)
 		save_currentstate();
@@ -777,16 +777,82 @@ void and_start_menu(winid wid)
 //		   with the default object class symbols.
 //		-- If you want this choice to be preselected when the
 //		   menu is displayed, set preselected to TRUE.
+#ifdef MENU_COLOR
+static void
+strip_brackets(str)
+char *str;
+{
+	/* from http://stackoverflow.com/questions/4161822 */
+	char *src, *dest;
+
+	src = dest = str; /* both pointers point to the first char of input */
+	while (*src != '\0') /* exit loop when null terminator reached */
+	{
+		if (*src != '[' && *src != ']') /* if source is not a [] char */
+		{
+			*dest = *src; /* copy the char at source to destination */
+			dest++;       /* increment destination pointer */
+		}
+		src++; /* increment source pointer */
+	}
+	*dest = '\0'; /* terminate string with null terminator */
+}
+
+extern struct menucoloring *menu_colorings;
+boolean
+get_menu_coloring(line, color, attr)
+const char *line;
+int *color, *attr;
+{
+    struct menucoloring *tmpmc;
+    boolean foundcolor = FALSE, foundattr = FALSE;
+    char str[BUFSZ];
+
+    strcpy(str, line);
+    strip_brackets(str);
+
+    if (iflags.use_menu_color && iflags.use_color)
+	for (tmpmc = menu_colorings; tmpmc; tmpmc = tmpmc->next)
+# ifdef MENU_COLOR_REGEX
+#  ifdef MENU_COLOR_REGEX_POSIX
+	    if (regexec(&tmpmc->match, str, 0, NULL, 0) == 0) {
+#  else
+	    if (re_search(&tmpmc->match, str, strlen(str), 0, 9999, 0) >= 0) {
+#  endif
+# else
+	    if (pmatch(tmpmc->match, str)) {
+# endif
+		if (!foundcolor && tmpmc->color != CLR_UNDEFINED) {
+		    *color = tmpmc->color;
+		    foundcolor = TRUE;
+		}
+		if (!foundattr && tmpmc->attr != ATR_UNDEFINED) {
+		    *attr = tmpmc->attr;
+		    foundattr = TRUE;
+		}
+		if (foundattr && foundcolor) return TRUE;
+	    }
+    if (foundcolor && !foundattr) *attr = ATR_NONE;
+    if (foundattr && !foundcolor) *color = NO_COLOR;
+    return foundcolor || foundattr;
+}
+#endif /* MENU_COLOR */
 void and_add_menu(winid wid, int glyph, int cnt, const ANY_P *ident, CHAR_P accelerator, CHAR_P groupacc, int attr, const char *str, BOOLEAN_P preselected)
 {
-	int tile;
+	int tile, color;
 	if(glyph == NO_GLYPH)
 		tile = -1;
 	else
 		tile = glyph2tile[glyph];
 
+	if(iflags.use_menu_color && get_menu_coloring((char*)str, &color, &attr)) {
+		color = nhcolor_to_RGB(color);
+	} else {
+		color = -1;
+	}
+
 	jbyteArray jstr = create_bytearray(str);
-	JNICallV(jAddMenu, wid, tile, ident->a_int, (int)accelerator, (int)groupacc, 1<<attr, jstr, (int)preselected);
+	JNICallV(jAddMenu, wid, tile, ident->a_int, (int)accelerator, (int)groupacc, 1<<attr, jstr, (int)preselected, color);
 	destroy_jobject(jstr);
 }
 
