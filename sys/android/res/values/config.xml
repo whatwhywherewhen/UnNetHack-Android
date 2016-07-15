@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="namespace">com.tbd.UnNetHack</string>
+	<string name="oldActivityName">UnNetHack</string>
 	<string name="nativeDataDir">unnethackdir</string>
 	<string name="libraryName">unnethack</string>
 	<string name="defaultsFile">defaults.unh</string>
