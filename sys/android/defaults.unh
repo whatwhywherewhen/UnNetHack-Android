@@ -28,14 +28,31 @@
 #
 # *** General options ***
 #
-OPTIONS=autopickup,pickup_types:$"=/!?+
 #OPTIONS=packorder:")[%?+/=!(*0_`
 #OPTIONS=scores:10 top/2 around/own
 #OPTIONS=nolegacy,noverbose
-#
+
 #OPTIONS=!lit_corridor,rest_on_space
 #OPTIONS=hilite_pet,!toptenwin
 #OPTIONS=!splash_screen
+
+#OPTIONS=autopickup,pickup_types:$"=/!?+
+OPTIONS=!autopickup
+
+OPTIONS=pilesize:1
+OPTIONS=showexp,time,toptenwin,DECgraphics,runmode:walk
+
+# Colorize individual rows on a menu based on what regular expressions match its text
+# http://nethackwiki.com/wiki/Menucolors
+MENUCOLOR=" blessed "=green
+MENUCOLOR=" holy "=green
+MENUCOLOR=" uncursed "=yellow
+MENUCOLOR=" cursed "=red
+MENUCOLOR=" unholy "=red
+MENUCOLOR=" cursed .* \(being worn\)"=red&underline
+MENUCOLOR="loadstone|wand (of|called) cancellation"=white&underline
+MENUCOLOR="Amulet of Yendor named"=magenta                           # color only the real Amulet
+MENUCOLOR="gold piece"=yellow
 
 #
 #
@@ -56,10 +73,5 @@ STATUSCOLOR=hallu:yellow,conf:orange,stun:red&bold
 ## Health                                                                                        
 STATUSCOLOR=ill:red&inverse,foodpois:red&inverse,slime:red&inverse                               
 ## Other                                                                                         
-STATUSCOLOR=held:red&inverse,blind:red&inverse                                                   
-                                                                                                 
-OPTIONS=pilesize:1                                                                               
-                                                                                                 
-OPTIONS=showexp,time,toptenwin,DECgraphics,runmode:walk
-
+STATUSCOLOR=held:red&inverse,blind:red&inverse
 

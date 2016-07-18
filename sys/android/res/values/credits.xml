@@ -4,8 +4,9 @@
 		name="credits">
 <![CDATA[
 
-<p><h1>UnNetHack Android Port</h1><br/>
-Based on UnNetHack 5.1.0<br/>
+<h1>UnNetHack Android Port</h1>
+<a href="https://github.com/gurrhack/UnNetHack-Android">Project Home</a><br/>
+<p>Based on UnNetHack 5.1.0<br/>
 <a href="http://unnethack.wordpress.com/">http://unnethack.wordpress.com/</a></p>
 
 <p><br/><br/><h2>Hearse Implementation</h2>
@@ -25,7 +26,7 @@ Based on UnNetHack 5.1.0<br/>
 <i>modified by Kelly Bailey and Patric Mueller</i><br/>
 <a href="https://web.archive.org/web/20121029092206/http://www.multifoliate.com/nh/">http://www.multifoliate.com/nh</a></p>
 
-<p><br/><small>&copy; 2013 Martin Gustafsson</small></p>
+<p><br/></p>
 ]]>
 	</string>
 </resources>
