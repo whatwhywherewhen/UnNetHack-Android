@@ -159,7 +159,7 @@ static struct Bool_Opt
 	{"mail", (boolean *)0, TRUE, SET_IN_FILE},
 #endif
 #ifdef MENU_COLOR
-# ifdef MICRO
+# if defined(MICRO) || defined(ANDROID)
 	{"menucolors", &iflags.use_menu_color, TRUE,  SET_IN_FILE},
 # else
 	{"menucolors", &iflags.use_menu_color, FALSE, SET_IN_FILE},
