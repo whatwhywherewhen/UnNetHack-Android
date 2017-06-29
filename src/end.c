@@ -206,9 +206,6 @@ register struct monst *mtmp;
 	boolean distorted = (boolean)(Hallucination && canspotmon(mtmp));
 
 	You("die...");
-#ifdef ANDROID
-	and_you_die();
-#endif
 	mark_synch();	/* flush buffered screen output */
 	buf[0] = '\0';
 	killer_format = KILLED_BY_AN;
@@ -596,6 +593,12 @@ int how;
 	    }
 #endif
 	}
+
+#ifdef ANDROID
+	if(how != TRICKED && how != QUIT && how != PANICKED && how != ESCAPED) {
+		and_you_die();
+	}
+#endif
 
 	/* kilbuf: used to copy killer in case it comes from something like
 	 *	xname(), which would otherwise get overwritten when we call
