@@ -2633,40 +2633,6 @@ click_to_cmd(x, y, mod)
             } else if(IS_THRONE(levl[u.ux][u.uy].typ)) {
                 cmd[0]=M('s');
                 return cmd;
-#ifdef ANDROID
-            } else {
-            	cmd[0] = '.';
-            	if((u.ux == xupstair && u.uy == yupstair)
-						  || (u.ux == sstairs.sx && u.uy == sstairs.sy && sstairs.up)
-						  || (u.ux == xupladder && u.uy == yupladder)) {
-					cmd[0] = '<';
-				} else if((u.ux == xdnstair && u.uy == ydnstair)
-						  || (u.ux == sstairs.sx && u.uy == sstairs.sy && !sstairs.up)
-						  || (u.ux == xdnladder && u.uy == ydnladder)) {
-					cmd[0] = '>';
-				}
-            	
-				if(OBJ_AT(u.ux, u.uy))
-				{
-	            	c = 0;
-					if(cmd[0] != '.')
-					{
-						/* On stairs with object(s) */
-						c = yn_function("There are objects here. Still climb?", ynqchars, 'y');
-						
-						if(c == 'n')
-							cmd[0] = Is_container(level.objects[u.ux][u.uy]) ? M('l') : ',';
-						else if(c == 'q')
-							cmd[0] = '.';
-					}
-					else
-					{
-						cmd[0] = Is_container(level.objects[u.ux][u.uy]) ? M('l') : ',';
-					}
-				}				
-				return cmd;
-            }
-#else
             } else if((u.ux == xupstair && u.uy == yupstair)
                       || (u.ux == sstairs.sx && u.uy == sstairs.sy && sstairs.up)
                       || (u.ux == xupladder && u.uy == yupladder)) {
@@ -2681,7 +2647,6 @@ click_to_cmd(x, y, mod)
             } else {
                 return "."; /* just rest */
             }
-#endif
         }
 
         /* directional commands */
