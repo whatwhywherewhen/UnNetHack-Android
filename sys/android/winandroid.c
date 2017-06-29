@@ -196,7 +196,7 @@ boolean SaveAndExit()
 		//debuglog("BAH!");
 		if(dosave0())
 		{
-			debuglog("DONE!");
+			//debuglog("DONE!");
 			program_state.something_worth_saving = 0;
 			u.uhp = -1;		/* universal game's over indicator */
 			/* make sure they see the Saving message */
@@ -845,9 +845,11 @@ void and_add_menu(winid wid, int glyph, int cnt, const ANY_P *ident, CHAR_P acce
 	else
 		tile = glyph2tile[glyph];
 
+#ifdef MENU_COLOR
 	if(iflags.use_menu_color && get_menu_coloring((char*)str, &color, &attr)) {
 		color = nhcolor_to_RGB(color);
 	} else {
+#endif
 		color = -1;
 	}
 

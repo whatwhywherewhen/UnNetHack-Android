@@ -20,7 +20,7 @@ char *s;
 {
 	register char *lp;
 
-	while((lp=index(s, '.')) || (lp=index(s, '/')) || (lp=index(s,' ')))
+	while((lp=index(s, '.')) || (lp=index(s, '/')) || (lp=index(s,' ')) || (lp=index(s,':')))
 		*lp = '_';
 }
 
@@ -86,7 +86,7 @@ gotlock:
 	}
 	else
 	{
-		debuglog("created lock(%s)", fq_lock);
+		//debuglog("created lock(%s)", fq_lock);
 
 		if(write(fd, (genericptr_t) &hackpid, sizeof(hackpid)) != sizeof(hackpid))
 		{
