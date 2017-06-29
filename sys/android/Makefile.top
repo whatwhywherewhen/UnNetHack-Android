@@ -251,7 +251,8 @@ install: $(GAME) recover $(VARDAT) dungeon spec_levs
 #	chmod $(DIRPERM) $(GAMEDIR) $(VARDIR) $(VARDIR)/save
 # set up the game files
 	( $(MAKE) dofiles )
-	( cd $(GAMEDIR) ; cp ../../defaults.unh ./ )
+	( cd $(GAMEDIR) ; cp ../../defaults.unh ./ ; \
+			cp ../../../../dat/unnethack_dump.css ./ )
 # set up some additional files
 #	touch $(VARDIR)/perm $(VARDIR)/record $(VARDIR)/logfile
 #	-( cd $(VARDIR) ; $(CHOWN) $(GAMEUID) perm record logfile ; \

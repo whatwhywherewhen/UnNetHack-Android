@@ -21,7 +21,14 @@
 #define tgetch nhgetch
 
 #undef SHELL
-#undef DUMP_LOG
+
+#define DUMP_LOG
+#undef DUMP_FN
+#define DUMP_HTML_CSS_FILE "unnethack_dump.css"
+#define DUMP_HTML_CSS_EMBEDDED
+#define DUMP_HTML_LOG
+#undef DUMP_TEXT_LOG
+
 #define UTF8_GLYPHS
 //#undef STATUS_COLORS
 #define ASCIIGRAPH

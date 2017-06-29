@@ -842,6 +842,7 @@ E char *FDECL(strstri, (const char *,const char *));
 #endif
 E boolean FDECL(fuzzymatch, (const char *,const char *,const char *,BOOLEAN_P));
 E void NDECL(setrandom);
+E time_t NDECL(getnow);
 E int NDECL(getyear);
 E int NDECL(getmonth);
 E int NDECL(getmday);
@@ -849,6 +850,7 @@ E int NDECL(getmday);
 E char *FDECL(yymmdd, (time_t));
 #endif
 E long FDECL(yyyymmdd, (time_t));
+E long FDECL(hhmmss, (time_t));
 E int NDECL(phase_of_the_moon);
 E boolean NDECL(friday_13th);
 E boolean NDECL(towelday);

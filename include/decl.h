@@ -225,6 +225,10 @@ E long killer_flags;
 
 #ifdef DUMP_LOG
 E char dump_fn[];		/* dumpfile name (dump patch) */
+E int dump_format;		/* dumpfile format */
+#define DUMP_FORMAT_HTML 1
+#define DUMP_FORMAT_TEXT 2
+#define DUMP_FORMAT_BOTH 3
 #endif
 #ifdef WHEREIS_FILE 
 E char whereis_real_path[255];

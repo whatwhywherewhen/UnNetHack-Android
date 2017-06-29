@@ -343,6 +343,12 @@ static struct Comp_Opt
 #else
 						PL_PSIZ, SET_IN_GAME },
 #endif
+    { "dumpfile_format", "format of the dumpfile", 1,
+#ifdef DUMP_FN
+						DISP_IN_GAME },
+#else
+						SET_IN_GAME },
+#endif
 #endif
 	{ "dungeon",  "the symbols to use in drawing the dungeon map",
 						MAXDCHARS+1, SET_IN_FILE },
@@ -1867,6 +1873,19 @@ boolean tinitial, tfrom_file;
 	}
 
 #ifdef DUMP_LOG
+    fullname = "dumpfile_format";
+    if (match_optname(opts, fullname, strlen(fullname), TRUE)) {
+        if (negated)
+            bad_negation(fullname, TRUE);
+		else if((op = string_for_opt(opts, FALSE)) != 0) {
+			if(!strcmp(op, "html"))		 dump_format = DUMP_FORMAT_HTML;
+			else if(!strcmp(op, "text")) dump_format = DUMP_FORMAT_TEXT;
+			else if(!strcmp(op, "both")) dump_format = DUMP_FORMAT_BOTH;
+			else badoption(opts);
+        }
+        return;
+    }
+
 	fullname = "dumpfile";
 	if (match_optname(opts, fullname, 3, TRUE)) {
 #ifndef DUMP_FN
@@ -3598,12 +3617,33 @@ boolean setinitial,setfromfile;
     char buf[BUFSZ];
     boolean retval = FALSE;
     
-    /* Special handling of menustyle, pickup_burden, pickup_types,
+    /* Special handling of dumpfile_format, menustyle, pickup_burden, pickup_types,
      * disclose, runmode, msg_window, menu_headings, number_pad and sortloot
 #ifdef AUTOPICKUP_EXCEPTIONS
      * Also takes care of interactive autopickup_exception_handling changes.
 #endif
      */
+#ifdef DUMP_LOG
+    if (!strcmp("dumpfile_format", optname)) {
+        menu_item *pick = (menu_item *) 0;
+
+        tmpwin = create_nhwindow(NHW_MENU);
+        start_menu(tmpwin);
+		any.a_int = DUMP_FORMAT_HTML;
+		add_menu(tmpwin, NO_GLYPH, MENU_DEFCNT, &any, 'h', 0, ATR_NONE, "html", MENU_UNSELECTED);
+		any.a_int = DUMP_FORMAT_TEXT;
+		add_menu(tmpwin, NO_GLYPH, MENU_DEFCNT, &any, 't', 0, ATR_NONE, "text", MENU_UNSELECTED);
+		any.a_int = DUMP_FORMAT_BOTH;
+		add_menu(tmpwin, NO_GLYPH, MENU_DEFCNT, &any, 'b', 0, ATR_NONE, "both", MENU_UNSELECTED);
+        end_menu(tmpwin, "Select dump file format:");
+        if (select_menu(tmpwin, PICK_ONE, &pick) > 0) {
+            dump_format = pick->item.a_int;
+            free((genericptr_t) pick);
+        }
+        destroy_nhwindow(tmpwin);
+        retval = TRUE;
+    } else
+#endif
     if (!strcmp("menustyle", optname)) {
 	const char *style_name;
 	menu_item *style_pick = (menu_item *)0;
@@ -4074,6 +4114,9 @@ char *buf;
 	else if (!strcmp(optname, "dogname")) 
 		Sprintf(buf, "%s", dogname[0] ? dogname : none );
 #ifdef DUMP_LOG
+	else if (!strcmp(optname, "dumpfile_format"))
+		Sprintf(buf, "%s", dump_format==DUMP_FORMAT_HTML ? "html" :
+		 				   (dump_format==DUMP_FORMAT_TEXT ? "text" : "both") );
 	else if (!strcmp(optname, "dumpfile"))
 		Sprintf(buf, "%s", dump_fn[0] ? dump_fn: none );
 #endif

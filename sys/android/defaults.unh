@@ -1,4 +1,4 @@
-# Sample config file for Android NetHack
+# Sample config file for Android UnNetHack
 # A '#' at the beginning of a line means the rest of the
 # line is a comment.
 #
@@ -7,7 +7,7 @@
 # will override corresponding options in the preference
 # screen.
 #
-# Not all NetHack options are supported in the Android
+# Not all UnNetHack options are supported in the Android
 # port. Unsupported options will be silently ignored.
 #
 # To change the configuration, comment out the unwanted
@@ -41,6 +41,28 @@ OPTIONS=!autopickup
 
 OPTIONS=pilesize:1
 OPTIONS=showexp,time,toptenwin,DECgraphics,runmode:walk
+
+OPTIONS=boulder:0
+
+# *** Dumpfile Options ***
+#
+# A dumpfile is a log that is written when the game is
+# over. It contains a view of the map and a record of the
+# player's belonging, attributes, etc.
+#
+# dumpfile: The path and name of the file where the log is
+# written. If a relative path is specified it is relative
+# to the game's data directory. Normally
+# /sdcard/Android/data/com.tbd.UnNetHack
+# The macros %n and %d can be used. %n is replaced by the
+# character's name and %d is replaced by the current date.
+#
+# dumpfile_format: the format of the log. It can be html,
+# text, or both. ".html" or ".txt" is appended to the
+# filename depending on format.
+#
+OPTIONS=dumpfile:unh_log
+OPTIONS=dumpfile_format:html
 
 # Colorize individual rows on a menu based on what regular expressions match its text
 # http://nethackwiki.com/wiki/Menucolors

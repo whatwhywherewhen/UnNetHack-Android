@@ -713,6 +713,7 @@ die:
 		   urole.name.f : urole.name.m);
 	  dump_header_html(pbuf);
 	  dump("", pbuf);
+	  dump_html("<br/>", "");
 	  /* D: Add a line for clearance from the screen dump */
 	  dump("", "");
 	  dump_screen();

@@ -1575,7 +1575,7 @@ dump_screen()
     dump("", ptr);
     bot2str(buf);
     dump("", buf);
-    dump_html("</pre>\n", "");
+    dump_html("</pre><br/>\n", "");
     dump("", "");
     dump("", "");
 #undef BUFSIZE_PER_SQUARE

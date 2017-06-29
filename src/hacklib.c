@@ -509,6 +509,15 @@ setrandom()
 #endif /* USE_MERSENNE_TWISTER */
 }
 
+time_t
+getnow()
+{
+    time_t datetime = 0;
+
+    (void) time(&datetime);
+    return datetime;
+}
+
 static struct tm *
 getlt()
 {
@@ -592,6 +601,22 @@ time_t date;
 	/* yyyymm --> yyyymmdd */
 	datenum = datenum * 100L + (long)lt->tm_mday;
 	return datenum;
+}
+
+long
+hhmmss(date)
+time_t date;
+{
+    long timenum;
+    struct tm *lt;
+
+    if (date == 0)
+        lt = getlt();
+    else
+        lt = localtime(&date);
+
+    timenum = lt->tm_hour * 10000L + lt->tm_min * 100L + lt->tm_sec;
+    return timenum;
 }
 
 /*

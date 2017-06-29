@@ -2421,9 +2421,11 @@ boolean allownone;
 		gtmp->quan = u.ugold;
 		gtmp->owt = weight(gtmp);
 		any.a_void = 0;		/* zero */
-		add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, 0, 0, iflags.menu_headings, "Coins", MENU_UNSELECTED);
+		if (want_disp)
+			add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, 0, 0, iflags.menu_headings, "Coins", MENU_UNSELECTED);
 	    any.a_char = '$';
-    	add_menu(win, obj_to_glyph(gtmp), u.ugold, &any, '$', 0, ATR_NONE, doname(gtmp), MENU_UNSELECTED);
+		if (want_disp)
+			add_menu(win, obj_to_glyph(gtmp), u.ugold, &any, '$', 0, ATR_NONE, doname(gtmp), MENU_UNSELECTED);
     	dealloc_obj(gtmp);
     }
 #endif
@@ -2489,7 +2491,7 @@ nextclass:
 #endif
 	}
 #ifdef ANDROID
-	if(iflags.automenu && lets) {
+	if(iflags.automenu && lets && want_disp) {
 		any.a_void = 0;		/* zero */
 		add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, 0, 0, iflags.menu_headings, "Special", MENU_UNSELECTED);
 		if(allownone) {

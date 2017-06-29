@@ -246,6 +246,14 @@ char dump_fn[] = DUMP_FN;
 #else
 char dump_fn[PL_PSIZ] = DUMMY;
 #endif
+int dump_format =
+	#if defined(DUMP_HTML_LOG) && defined(DUMP_TEXT_LOG)
+		DUMP_FORMAT_BOTH;
+	#elif defined(DUMP_HTML_LOG)
+		DUMP_FORMAT_HTML;
+	#else
+		DUMP_FORMAT_TEXT;
+	#endif
 #endif /* DUMP_LOG */
 
 NEARDATA struct c_color_names c_color_names = {

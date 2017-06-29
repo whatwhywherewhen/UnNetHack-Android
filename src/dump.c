@@ -11,6 +11,9 @@
 #  include <utime.h>
 #  include <errno.h>
 # endif
+#ifdef ANDROID
+#  include <sys/stat.h>
+#endif
 extern char msgs[][BUFSZ];
 extern int lastmsg;
 void FDECL(do_vanquished, (int, BOOLEAN_P));
@@ -26,52 +29,95 @@ char html_dump_path[BUFSIZ];
  * - started/ended date at the top
  */
 
+static int count_fmt(char* format, int ch) {
+	int count = 0;
+	while((format = index(format, '%')))
+		if(*(format++)==ch) count++;
+	return count;
+}
+
 static
 char*
 get_dump_filename()
 {
-  int new_dump_fn_len = strlen(dump_fn)+strlen(plname)+5; /* space for ".html" */
-  char *new_dump_fn = (char *) alloc((unsigned)(new_dump_fn_len+1));
-  char rplname[BUFSZ];
-  /* backwards compatibility, replace %n with %s */
-  char *p = (char *) strstr(dump_fn, "%n");
-  if (p) { *(p+1) = 's'; }
+	int nn = count_fmt(dump_fn, 'n') + count_fmt(dump_fn, 's');
+	int nd = count_fmt(dump_fn, 'd');
+	int plname_len = strlen(plname);
+	int date_len = 15;
+	int new_dump_fn_len = strlen(dump_fn) + nn*plname_len + nd*date_len + 5; /* space for ".html" */;
+	char *new_dump_fn = (char *) alloc((unsigned)(new_dump_fn_len+1));
+	char *dst = new_dump_fn;
+	char *ps = dump_fn, *pe;
+	time_t now = getnow();
 
-  p = (char *) strstr(dump_fn, "%s");
-
-  if (p) {
-    /* replace %s with player name */
-    strcpy(rplname, plname);
-    regularize(rplname);
-    sprintf(new_dump_fn, dump_fn, plname);
-  } else {
-    strcpy(new_dump_fn, dump_fn);
-  }
-  return new_dump_fn;
+	while((pe = index(ps, '%'))) {
+		memcpy(dst, ps, pe-ps);
+		dst += pe-ps;
+		if(pe[1]=='n' || pe[1]=='s') {
+			strcpy(dst, plname);
+			regularize(dst);
+			dst += plname_len;
+		} else if(pe[1]=='d') {
+			sprintf(dst, "%ld_%ld", yyyymmdd(now), hhmmss(now));
+			dst += date_len;
+		} else {
+			*dst++ = '%';
+			pe--;
+		}
+		ps = pe + 2;
+	}
+	strcpy(dst, ps);
+	return new_dump_fn;
 }
 
+static void
+mkdir_p(filename)
+char* filename;
+{
+	char *de, *ds = filename;
+	if(*ds == '/') ds++;
+	while((de = index(ds, '/'))) {
+		*de = 0;
+		mkdir(filename, 0777);
+		*de = '/';
+		ds = de + 1;
+	}
+}
 void
 dump_init()
 {
   if (dump_fn[0]) {
     char *new_dump_fn = get_dump_filename();
+    if(!new_dump_fn)
+    	return;
 
-#ifdef DUMP_TEXT_LOG
+#ifdef ANDROID
+	mkdir_p(new_dump_fn);
+#endif
+
+if(dump_format&DUMP_FORMAT_TEXT) {
+#ifdef ANDROID
+    strncpy(dump_path, strcat(new_dump_fn, ".txt"), BUFSIZ-1);
+#else
     strncpy(dump_path, new_dump_fn, BUFSIZ-1);
+#endif
     dump_fp = fopen(new_dump_fn, "w");
     if (!dump_fp) {
 	pline("Can't open %s for output.", new_dump_fn);
 	pline("Dump file not created.");
     }
+#ifdef ANDROID
+	new_dump_fn[strlen(new_dump_fn)-4] = 0;
 #endif
-#ifdef DUMP_HTML_LOG
+}
+if(dump_format&DUMP_FORMAT_HTML) {
     strncpy(html_dump_path, strcat(new_dump_fn, ".html"), BUFSIZ-1);
     html_dump_fp = fopen(html_dump_path, "w");
     if (!html_dump_fp) {
 	pline("Can't open %s for output.", new_dump_fn);
 	pline("Html dump file not created.");
     }
-#endif
+}
     if (new_dump_fn) free(new_dump_fn);
   }
 }
@@ -192,7 +238,7 @@ const char *str;
 	if (html_dump_fp) {
 		char *link = html_link(dump_typename(obj->otyp), str);
 #ifdef MENU_COLOR
-# ifdef TTY_GRAPHICS
+# if defined(TTY_GRAPHICS) || defined(ANDROID_GRAPHICS)
 		int color;
 		int attr;
 		if (iflags.use_menu_color &&
@@ -270,7 +316,7 @@ struct obj *obj;
 		const char* str = doname(obj);
 		char *link = html_link(dump_typename(obj->otyp), str);
 #ifdef MENU_COLOR
-# ifdef TTY_GRAPHICS
+# if defined(TTY_GRAPHICS) || defined(ANDROID_GRAPHICS)
 		int color;
 		int attr;
 		if (iflags.use_menu_color &&
@@ -377,7 +423,7 @@ static
 void
 dump_html_css_file(const char *filename)
 {
-#  ifdef DUMP_HTML_LOG
+if (html_dump_fp) {
 	FILE *css = fopen(filename, "r");
 	if (!css) {
 		pline("Can't open %s for input.", filename);
@@ -389,7 +435,7 @@ dump_html_css_file(const char *filename)
 		}
 		fclose(css);
 	}
-#  endif
+}
 }
 # endif
 #endif
@@ -407,6 +453,11 @@ const char *title;
 	dump_html("<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\" />\n", "");
 	dump_html("<meta name=\"generator\" content=\"UnNetHack " VERSION_STRING "\" />\n", "");
 	dump_html("<meta name=\"date\" content=\"%s\" />\n", iso8601(0));
+#ifdef ANDROID
+	dump_html("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n", "");
+	dump_html("<meta name=\"format-detection\" content=\"telephone=no\">\n", "");
+	dump_html("<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/font-hack/2.020/css/hack-extended.min.css\"/>\n", "");
+#endif
 #ifdef DUMP_HTML_CSS_FILE
 # ifndef DUMP_HTML_CSS_EMBEDDED
 	dump_html("<link rel=\"stylesheet\" type=\"text/css\" href=\"" DUMP_HTML_CSS_FILE "\" />\n", "");
