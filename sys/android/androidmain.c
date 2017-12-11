@@ -61,7 +61,7 @@ int UnNetHackMain(int argc, char** argv)
 	if(val)
 	{
 		debuglog("exiting...");
-		return;
+		return 0;
 	}
 
 	register int fd;
