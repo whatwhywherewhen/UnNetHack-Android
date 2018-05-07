@@ -12,4 +12,5 @@
 	<string name="hearseRoles">Arc|Bar|Cav|Con|Hea|Kni|Mon|Pri|Rog|Ran|Sam|Tou|Val|Wiz</string>
 	<string name="hearseNethackVersion">56</string>
 	<bool name="hearseLittleEndian">true</bool>
+	<bool name="oldStatusMode">true</bool>
 </resources>
