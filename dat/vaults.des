@@ -197,7 +197,7 @@ ROOM:"rndvault", random, random, random, random {
   $mon = MONSTER: { '@', "apprentice", "warrior", "ninja", "thug", "hunter", "acolyte", "abbot",
              "page", "attendant", "neanderthal", "chieftain", "student", "wizard", "valkyrie",
 	     "tourist", "samurai", "rogue", "ranger", "priestess", "priest", "monk",
-             "knight", "healer", "cavewoman", "caveman", "barbarian", "archeologist" }
+             "knight", "healer", "cavewoman", "caveman", "barbarian", "archeologist", "convict"}
   SHUFFLE: $mon
   LOOP [5d5] {
     [10%]: SHUFFLE: $mon
@@ -226,6 +226,18 @@ ROOM:"ordinary", unlit, random, random, random {
   OBJECT:('(', "oil lamp"), random, lit
 }
 
+# potentially spooky
+LEVEL:"vlt-%04i"
+FLAGS:rndvault
+ROOM:"ordinary", unlit, random, random, random {
+  IF [time.night] {
+  GRAVE:random
+  [20%]: GRAVE:random, random
+		IF [level.depth>10] {
+		MONSTER: '&', random
+		}
+  }
+}
 
 # temple of the gods
 LEVEL:"vlt-%04i"
@@ -1098,6 +1110,8 @@ ROOM:"rndvault", random, random, random, random {
   IF [50%] { MONSTER: ('F', "swamp fern"), random, hostile }
 }
 
+
+
 # Ozymandias' Tomb
 LEVEL:"vlt-%04i"
 FLAGS:rndvault
@@ -1119,11 +1133,45 @@ ENGRAVING: (6,4), burn, "Look on my works, ye mighty, and despair"
 [50%]: TRAP: "hole", (3,2)
 [80%]: TRAP: "hole", (5,3)
 [30%]: TRAP: "hole", (3,6)
-[75%]: TRAP: "web", (1,1)
-[75%]: TRAP: "web", (1,6)
-TRAP: "web", (7,6)
+IF [ level.depth >= 7 ] {
+  # for consistency with random web traps' depth limit
+  [75%]: TRAP: "web", (1,1)
+  [75%]: TRAP: "web", (1,6)
+  TRAP: "web", (7,6)
+} ELSE {
+  [75%]: TRAP: "falling rock", (1,1)
+  [75%]: TRAP: "falling rock", (1,6)
+  TRAP: "falling rock", (7,6)
+}
 CONTAINER:"chest", (7,1), trapped { }
 TRAP: "statue", (7,3)
 TRAP: "statue", (7,7)
 OBJECT:('`',"statue"),(7,3),montype:('d', "werejackal")
-OBJECT:('`',"statue"),(7,1),montype:('@', "elvenking")
+OBJECT:('`',"statue"),(7,7),montype:('@', "elvenking")
+
+# Pacman
+LEVEL:"vlt-%04i"
+FLAGS:rndvault
+GEOMETRY:random
+MAP
+--------------------
+|....|........|....|
+|.--.|.------.|.--.|
+|.|..............|.|
+|.|.--.|-FF-|.--.|.|
+|......|    |......|
+|.|.--.|----|.--.|.|
+|.|..............|.|
+|.--.|.------.|.--.|
+|....|........|....|
+--------------------
+ENDMAP
+OBJECT:"apple",random
+OBJECT:"pear",random
+OBJECT:"banana",random
+OBJECT:"orange",random
+OBJECT:"melon",random
+MONSTER:"ghost",random,"Inky"
+MONSTER:"ghost",random,"Blinky"
+MONSTER:"ghost",random,"Pinky"
+MONSTER:"ghost",random,"Clyde"

@@ -228,7 +228,8 @@ check-dlb: @OPTIONS_FILE@
 
 dlb: spec_levs
 	( cd util ; $(MAKE) dlb )
-	( cd dat ; ../util/dlb cf nhdat $(SHARE_DATDLB) $(UNSHARE_DATDLB) )
+	( cd dat ; LC_ALL=C ; ../util/dlb cf nhdat $(SHARE_DATDLB) $(UNSHARE_DATDLB) )
+
 
 # recover can be used when INSURANCE is defined in include/config.h
 # and the checkpoint option is true
@@ -251,6 +252,7 @@ dofiles:
 		cp $(srcdir)/doc/Guidebook.txt $(DESTDIR)$(FILE_AREA_DOC); \
 	fi
 	cp $(srcdir)/dat/license $(DESTDIR)$(FILE_AREA_DOC)
+	cp $(srcdir)/dat/unnethack_dump.css $(DESTDIR)$(FILE_AREA_UNSHARE)
 	@HOST_UNIX@-rm -f $(DESTDIR)$(SHELLDIR)/$(SCRIPT)
 	@HOST_UNIX@sed -e 's;/usr/games/lib/nethackdir;$(FILE_AREA_UNSHARE);' \
 	@HOST_UNIX@	-e 's;HACKDIR/nethack;HACKDIR/$(GAME);' \

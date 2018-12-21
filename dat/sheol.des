@@ -42,6 +42,9 @@ TRAP: random, random
 TRAP: random, random
 TRAP: random, random
 TRAP: random, random
+#IF (hero.name == "Isaac") {
+#	TRAP:"trap door", random
+#}
 
 # Middle level
 LEVEL: "sheolmid"
@@ -126,6 +129,9 @@ TRAP: random, random
 TRAP: random, random
 TRAP: random, random
 TRAP: random, random
+#IF (hero.name == "Isaac") {
+#	TRAP:"trap door", random
+#}
 
 MONSTER: random, random
 MONSTER: random, random
@@ -333,6 +339,11 @@ TRAP: random, random
 TRAP: random, random
 TRAP: random, random
 TRAP: random, random
+
+# Binding of Isaac
+[10%]: GRAVE: random, "Isaac - Sacrificed by Mother"
+[30%]: GRAVE: random, "Guppy - Beloved by Flies"
+
 
 # Random chests
 OBJECT:('(',"chest"),(62,8)

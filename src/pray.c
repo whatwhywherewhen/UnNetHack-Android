@@ -121,16 +121,6 @@ in_trouble()
 	struct obj *otmp;
 	int i, j, count=0;
 
-/* Borrowed from eat.c */
-
-#define SATIATED	0
-#define NOT_HUNGRY	1
-#define HUNGRY		2
-#define WEAK		3
-#define FAINTING	4
-#define FAINTED		5
-#define STARVED		6
-
 	/*
 	 * major troubles
 	 */
@@ -197,7 +187,7 @@ in_trouble()
 	if(u.uhs >= HUNGRY) return(TROUBLE_HUNGRY);
 	if(HStun) return (TROUBLE_STUNNED);
 	if(HConfusion) return (TROUBLE_CONFUSED);
-	if(Hallucination) return(TROUBLE_HALLUCINATION);
+	if(Hallucination && !flags.perma_hallu) return(TROUBLE_HALLUCINATION);
 	return(0);
 }
 

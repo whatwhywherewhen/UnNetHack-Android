@@ -40,7 +40,6 @@ STATIC_DCL void FDECL(get_valuables, (struct obj *));
 STATIC_DCL void FDECL(sort_valuables, (struct valuable_data *,int));
 STATIC_DCL void FDECL(artifact_score, (struct obj *,BOOLEAN_P,winid));
 STATIC_DCL void FDECL(savelife, (int));
-void FDECL(list_vanquished, (CHAR_P,BOOLEAN_P));
 #ifdef DUMP_LOG
 extern char msgs[][BUFSZ];
 extern int msgs_count[];
@@ -896,6 +895,8 @@ die:
 #define DUMP_DATE_FORMAT "%Y-%m-%d %H:%M:%S"
 	dump_title("Game information");
 	dump_html("<div class=\"nh_game_information\">\n", "");
+	Sprintf(pbuf, "  Seed: %u", level_info[0].seed);
+	dump_line(pbuf,"");
 	dump_line("  Started: ", get_formatted_time(u.ubirthday, DUMP_DATE_FORMAT));
 	dump_line("  Ended:   ", get_formatted_time(u.udeathday, DUMP_DATE_FORMAT));
 #ifdef RECORD_REALTIME

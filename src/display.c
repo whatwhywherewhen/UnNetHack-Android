@@ -759,8 +759,10 @@ newsym(x,y)
 	else if (!lev->waslit || (iflags.dark_room && iflags.use_color)) {
 	    if (lev->glyph == cmap_to_glyph(S_litcorr) && lev->typ == CORR)
 		show_glyph(x, y, lev->glyph = cmap_to_glyph(S_corr));
-	    else if (lev->glyph == cmap_to_glyph(S_room) && lev->typ == ROOM)
+#ifdef REINCARNATION
+	    else if (!Is_rogue_level(&u.uz) && lev->glyph == cmap_to_glyph(S_room) && lev->typ == ROOM)
 		show_glyph(x, y, lev->glyph = cmap_to_glyph(DARKROOMSYM));
+#endif
 	    else
 		goto show_mem;
 	} else {
@@ -1326,6 +1328,7 @@ row_refresh(start,stop,y)
     for (x = start; x <= stop; x++)
 	if (gbuf[y][x].glyph != cmap_to_glyph(S_stone))
 	    print_glyph(WIN_MAP,x,y,gbuf[y][x].glyph);
+    display_nhwindow(WIN_MAP,FALSE);
 }
 
 void
@@ -1575,6 +1578,10 @@ dump_screen()
     dump("", ptr);
     bot2str(buf);
     dump("", buf);
+    if (iflags.statuslines >= 3) {
+        bot3str(buf);
+        dump("", buf);
+    }
     dump_html("</pre><br/>\n", "");
     dump("", "");
     dump("", "");

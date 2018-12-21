@@ -1781,6 +1781,9 @@ int croaked;	/* -1: escaped dungeon; 0: quit; 1: died */
 	    numsk++;
 	    resident = mtmp;
 	    taken = inherits(resident, numsk, croaked);
+#ifdef CONVICT
+	    ESHK(mtmp)->pbanned = FALSE; /* Un-ban for bones levels */
+#endif /* CONVICT */
 	}
 	for (mtmp = next_shkp(fmon, FALSE);
 		mtmp; mtmp = next_shkp(mtmp2, FALSE)) {
@@ -2957,7 +2960,7 @@ move_on:
 			    "it" : "them");
 		} else  qbuf[0] = '\0';		/* just to pacify lint */
 
-		switch (sell_response ? sell_response : ynaq(qbuf)) {
+		switch (sell_response ? sell_response : nyaq(qbuf)) {
 		 case 'q':  sell_response = 'n';
 		 case 'n':  if (container)
 				dropped_container(obj, shkp, FALSE);

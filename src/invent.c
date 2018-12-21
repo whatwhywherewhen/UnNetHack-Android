@@ -18,7 +18,7 @@ STATIC_DCL boolean FDECL(putting_on, (const char *));
 STATIC_PTR int FDECL(ckunpaid,(struct obj *));
 STATIC_PTR int FDECL(ckvalidcat,(struct obj *));
 static char FDECL(display_pickinv,
-		 (const char *,BOOLEAN_P, long *, BOOLEAN_P));
+		 (const char *,BOOLEAN_P, long *, BOOLEAN_P, BOOLEAN_P));
 static char FDECL(display_pickinv_q,
 		 (const char *,BOOLEAN_P, long *, BOOLEAN_P, const char *, BOOLEAN_P));
 STATIC_DCL boolean FDECL(this_type_only, (struct obj *));
@@ -1139,7 +1139,7 @@ register const char *let,*word;
 			allowed_choices = altlets;
 		    ilet = display_pickinv(allowed_choices, TRUE,
 					   allowcnt ? &ctmp : (long *)0
-					   , TRUE
+					   , FALSE, TRUE
 					   );
 		    if(!ilet) continue;
 		    if (allowcnt && ctmp >= 0) {
@@ -1789,10 +1789,15 @@ long quan;		/* if non-0, print this quantity, not obj->quan */
 #endif
     boolean use_invlet = flags.invlet_constant && let != CONTAINED_SYM;
     long savequan = 0;
+    unsigned save_owt = 0;
 
+    if (quan && obj && flags.invweight) {
+        save_owt = obj->owt;
+        obj->owt = obj->owt * quan / obj->quan;
+    }
     if (quan && obj) {
-	savequan = obj->quan;
-	obj->quan = quan;
+        savequan = obj->quan;
+        obj->quan = quan;
     }
 
     /*
@@ -1801,22 +1806,27 @@ long quan;		/* if non-0, print this quantity, not obj->quan */
      *	>  Then the object is contained and doesn't have an inventory letter.
      */
     if (cost != 0 || let == '*') {
-	/* if dot is true, we're doing Iu, otherwise Ix */
-	Sprintf(li, "%c - %-45s %6ld %s",
-		(dot && use_invlet ? obj->invlet : let),
-		(txt ? txt : doname(obj)), cost, currency(cost));
+        /* if dot is true, we're doing Iu, otherwise Ix */
+        Sprintf(li, "%c - %-45s %6ld %s",
+                (dot && use_invlet ? obj->invlet : let),
+                (txt ? txt : doname(obj)), cost, currency(cost));
 #ifndef GOLDOBJ
     } else if (obj && obj->oclass == COIN_CLASS) {
-	Sprintf(li, "%ld gold piece%s%s", obj->quan, plur(obj->quan),
-		(dot ? "." : ""));
+        Sprintf(li, "%ld gold piece%s%s", obj->quan, plur(obj->quan),
+                (dot ? "." : ""));
 #endif
     } else {
-	/* ordinary inventory display or pickup message */
-	Sprintf(li, "%c - %s%s",
-		(use_invlet ? obj->invlet : let),
-		(txt ? txt : doname(obj)), (dot ? "." : ""));
+        /* ordinary inventory display or pickup message */
+        Sprintf(li, "%c - %s%s",
+                (use_invlet ? obj->invlet : let),
+                (txt ? txt : doname(obj)), (dot ? "." : ""));
     }
-    if (savequan) obj->quan = savequan;
+    if (savequan) {
+        obj->quan = savequan;
+    }
+    if (save_owt) {
+        obj->owt = save_owt;
+    }
 
     return li;
 }
@@ -2269,11 +2279,12 @@ struct obj *obj2;
  * any count returned from the menu selection is placed here.
  */
 static char
-display_pickinv(lets, want_reply, out_cnt, want_disp)
+display_pickinv(lets, want_reply, out_cnt, want_dump, want_disp)
 register const char *lets;
 boolean want_reply;
 long* out_cnt;
 boolean want_disp;
+boolean want_dump;
 {
 	return display_pickinv_q(lets, want_reply, out_cnt, want_disp, 0, FALSE);
 }
@@ -2310,7 +2321,7 @@ boolean allownone;
 	} else
 	    win = WIN_INVEN;
 	}
-	dump_title("Your inventory");
+	if (want_dump) dump_title("Your inventory");
 
 	/*
 	Exit early if no inventory -- but keep going if we are doing
@@ -2338,11 +2349,13 @@ boolean allownone;
 	    pline("Not carrying anything.");
 #endif
 	  }
+          if (want_dump) {
 #ifdef GOLDOBJ
 	    dump("  ", "Not carrying anything");
 #else
 	    dump("  Not carrying anything", u.ugold ? " except gold." : ".");
 #endif
+          }
 	    return 0;
 #if defined(ANDROID) && !defined(GOLDOBJ) 
 	}
@@ -2368,9 +2381,7 @@ boolean allownone;
 			  xprname(otmp, (char *)0, lets[0], TRUE, 0L, 0L));
 		    if (out_cnt) *out_cnt = -1L;	/* select all */
 		  }
-		  {
-		    char letbuf[7];
-		    sprintf(letbuf, "  %c - ", lets[0]);
+                  if (want_dump) {
 		    dump_object(lets[0], otmp,
 			 xprname(otmp, (char *)0, lets[0], TRUE, 0L, 0L));
 		  }
@@ -2443,7 +2454,7 @@ nextclass:
 	      if (want_disp)
 			add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, 0, 0, iflags.menu_headings,
 			       let_to_name(*invlet, FALSE), MENU_UNSELECTED);
-	      dump_subtitle(let_to_name(*invlet, FALSE));
+              if (want_dump) dump_subtitle(let_to_name(*invlet, FALSE));
 	      classcount++;
 	    }
 	    any.a_char = ilet;
@@ -2451,7 +2462,7 @@ nextclass:
 		add_menu(win, obj_to_glyph(otmp), otmp->quan,
 			     &any, ilet, 0, ATR_NONE, doname(otmp),
 			     MENU_UNSELECTED);
-	    dump_object(ilet, otmp, doname(otmp));
+            if (want_dump) dump_object(ilet, otmp, doname(otmp));
 	  }
 	}
 #else /* SORTLOOT */
@@ -2461,14 +2472,14 @@ nextclass:
 			if (!flags.sortpack || otmp->oclass == *invlet) {
 			    if (flags.sortpack && !classcount) {
 				any.a_void = 0;		/* zero */
-				dump_subtitle(let_to_name(*invlet, FALSE));
+				if (want_dump) dump_subtitle(let_to_name(*invlet, FALSE));
 				if (want_disp)
 				add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, 0, 0, iflags.menu_headings,
 				    let_to_name(*invlet, FALSE), MENU_UNSELECTED);
 				classcount++;
 			    }
 			    any.a_char = ilet;
-			    {
+			    if (want_dump) {
 			      char letbuf[7];
 			      sprintf(letbuf, "  %c - ", ilet);
 			      dump_object(ilet, otmp, doname(otmp));
@@ -2516,7 +2527,7 @@ nextclass:
 	} else
 	    ret = !n ? '\0' : '\033';	/* cancelled */
 	} /* want_disp */
-	dump("", "");
+	if (want_dump) dump("", "");
 
 	return ret;
 }
@@ -2533,7 +2544,7 @@ display_inventory(lets, want_reply)
 register const char *lets;
 boolean want_reply;
 {
-	return display_pickinv(lets, want_reply, (long *)0, TRUE);
+	return display_pickinv(lets, want_reply, (long *)0, FALSE, TRUE);
 }
 
 /* See display_inventory. This is the same thing WITH dumpfile creation */
@@ -2542,7 +2553,7 @@ dump_inventory(lets, want_reply, want_disp)
 register const char *lets;
 boolean want_reply, want_disp;
 {
-  return display_pickinv(lets, want_reply, (long *)0, want_disp);
+  return display_pickinv(lets, want_reply, (long *)0, TRUE, want_disp);
 }
 
 /**

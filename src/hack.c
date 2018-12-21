@@ -16,6 +16,7 @@ STATIC_DCL boolean FDECL(findtravelpath, (boolean(*)(int, int)));
 STATIC_DCL boolean FDECL(monstinroom, (struct permonst *,int));
 STATIC_DCL void FDECL(move_update, (BOOLEAN_P));
 STATIC_DCL void FDECL(struggle_sub, (const char *));
+static boolean check_interrupt(struct monst *mtmp);
 
 static boolean door_opened;	/* set to true if door was opened during test_move */
 
@@ -1149,10 +1150,34 @@ autotravel_weighting(x, y, distance)
 int x, y;
 unsigned distance;
 {
-	if (glyph_is_object(levl[x][y].glyph)) {
+	int glyph = levl[x][y].glyph;
+
+	if (glyph_is_object(glyph)) {
 		/* greedy for items */
 		return distance;
 	}
+
+	/* some dungeon features */
+	int cmap = glyph_to_cmap(glyph);
+	if (cmap == S_altar  ||
+	    cmap == S_throne ||
+	    cmap == S_sink   ||
+	    cmap == S_fountain) {
+		return distance;
+	}
+
+	/* stairs and ladders */
+	if (cmap == S_dnstair  || cmap == S_upstair  ||
+	    cmap == S_dnladder || cmap == S_upladder) {
+		return distance;
+	}
+
+	/* favor rooms, but not closed doors */
+	int roomno = levl[x][y].roomno;
+	if (roomno && !(cmap == S_hcdoor || cmap == S_vcdoor)) {
+		return distance * 2;
+	}
+
 	/* by default return distance multiplied by a large constant factor */
 	return distance*10;
 }
@@ -2766,38 +2791,52 @@ lookaround()
        unless sessile or shift-moving. We don't count detection just
        via telepathy, as it might be over the other end of the level,
        unless the monster is within 5 spaces of us. */
-    for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-        if (((canseemon(mtmp) &&
-              (Protection_from_shape_changers ||
-               mtmp->m_ap_type != M_AP_FURNITURE && mtmp->m_ap_type != M_AP_OBJECT)) ||
-             (sensemon(mtmp) && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) <= 5)) &&
-            !mtmp->mpeaceful && !mtmp->mtame &&
-            mtmp->data->mmove && flags.run != 1) {
-            nomul(0, 0);
-            return;
-        }
-    }
+	if(flags.run != 1) {
+		for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+			if (distmin(u.ux, u.uy, mtmp->mx, mtmp->my) <= (BOLT_LIM + 1) &&
+			    couldsee(mtmp->mx, mtmp->my) &&
+			    check_interrupt(mtmp)) {
+				nomul(0, NULL);
+				return;
+			}
+		}
+	}
 
     if(Blind || flags.run == 0) return;
     for(x = u.ux-1; x <= u.ux+1; x++) for(y = u.uy-1; y <= u.uy+1; y++) {
+	/* Ignore squares that aren't within the boundary. */
 	if(!isok(x,y)) continue;
 
+	/* If you're a grid bug, ignore diagonals. */
 	if(u.umonnum == PM_GRID_BUG && x != u.ux && y != u.uy) continue;
 
+	/* Don't care about the square we're already on. */
 	if(x == u.ux && y == u.uy) continue;
 
+	/* We already checked for hostile monsters above. Interrupt$
+	   non-aggressive moves if we're going to run into a *peaceful*$
+	   monster. */
 	if((mtmp = m_at(x,y)) &&
 		    mtmp->m_ap_type != M_AP_FURNITURE &&
 		    mtmp->m_ap_type != M_AP_OBJECT &&
 		    (!mtmp->minvis || See_invisible) && !mtmp->mundetected) {
-	    if((flags.run != 1 && !mtmp->mtame)
+	    if((flags.run != 1 && check_interrupt(mtmp))
 	       || (x == u.ux+u.dx && y == u.uy+u.dy && !flags.travel))
 		goto stop;
 	}
 
+	/* Adjacent stone won't interrupt anything. */
 	if (levl[x][y].typ == STONE) continue;
+	/*
+	 * We don't need to check the space in the opposite direction of the
+	 * one we're thinking of entering.
+	 * IMPORTANT NOTE: This means corrct shouldn't count a corridor
+	 * directly behind us.  If you're moving along a corridor with no
+	 * branches, corrct will be 1.
+	 */
 	if (x == u.ux-u.dx && y == u.uy-u.dy) continue;
 
+	/*  More boring cases that don't interrupt anything. */
 	if (IS_ROCK(levl[x][y].typ) || (levl[x][y].typ == ROOM) ||
 	    IS_AIR(levl[x][y].typ))
 	    continue;
@@ -2886,6 +2925,23 @@ stop:
     }
 }
 
+/* Check whether the monster should be considered a threat and interrupt
+ * the current action. */
+/* Also see the similar check in dochugw() in monmove.c */
+static boolean
+check_interrupt(struct monst *mtmp)
+{
+	return (mtmp->m_ap_type != M_AP_FURNITURE &&
+	        mtmp->m_ap_type != M_AP_OBJECT &&
+	        (!is_hider(mtmp->data) || !mtmp->mundetected) &&
+	        (!mtmp->mpeaceful || Hallucination) &&
+	        !noattacks(mtmp->data) && !mtmp->msleeping &&
+	        mtmp->data->mmove && mtmp->mcanmove &&
+	        !onscary(u.ux, u.uy, mtmp) &&
+	        canspotmon(mtmp));
+}
+
+
 /* something like lookaround, but we are not running */
 /* react only to monsters that might hit us */
 int
@@ -2894,22 +2950,14 @@ monster_nearby()
 	register int x,y;
 	register struct monst *mtmp;
 
-	/* Also see the similar check in dochugw() in monmove.c */
 	for(x = u.ux-1; x <= u.ux+1; x++)
-	    for(y = u.uy-1; y <= u.uy+1; y++) {
-		if(!isok(x,y)) continue;
-		if(x == u.ux && y == u.uy) continue;
-		if((mtmp = m_at(x,y)) &&
-		   mtmp->m_ap_type != M_AP_FURNITURE &&
-		   mtmp->m_ap_type != M_AP_OBJECT &&
-		   (!mtmp->mpeaceful || Hallucination) &&
-		   (!is_hider(mtmp->data) || !mtmp->mundetected) &&
-		   !noattacks(mtmp->data) &&
-		   mtmp->mcanmove && !mtmp->msleeping &&  /* aplvax!jcn */
-		   !onscary(u.ux, u.uy, mtmp) &&
-		   canspotmon(mtmp))
-			return(1);
-	}
+		for(y = u.uy-1; y <= u.uy+1; y++) {
+			if (!isok(x,y)) continue;
+			if (x == u.ux && y == u.uy) continue;
+			if ((mtmp = m_at(x,y)) && check_interrupt(mtmp)) {
+				return(1);
+			}
+		}
 	return(0);
 }
 

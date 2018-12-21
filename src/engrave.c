@@ -92,8 +92,10 @@ static const char *random_mesg[] = {
 	"This engraving is false!",
 	"The engraving you have just started reading is the engraving you have just finished reading",
 	"Elvis has left the dungeon.",
+	"Lorem ipsum dolor sit amet.", /* Typesetting */
 	"For truth, justice, and the Yendorian way!",
 	"This engraving, no verb",        /* Douglas Hofstadter */
+	"You will curse my name to the heavens and the heavens will side with me"  /* War of Omens */
 	
 	/* From dNetHack */
 	"[REDACTED]", "[DATA EXPUNGED]", "[DATA PLUNGED]", /* SCP Foundation */
@@ -628,7 +630,7 @@ boolean fingers;
 	 */
 
 	if (fingers) {
-		if (uwep && uwep->otyp == ATHAME) {
+		if (uwep && !uwep->cursed && uwep->otyp == ATHAME) {
 			otmp = uwep;
 		} else {
 			otmp = &zeroobj;
@@ -786,11 +788,19 @@ boolean fingers;
 			}
 			break;
 		    case WAN_NOTHING:
-		    case WAN_UNDEAD_TURNING:
 		    case WAN_OPENING:
 		    case WAN_LOCKING:
 		    case WAN_PROBING:
 			break;
+
+            case WAN_UNDEAD_TURNING:
+            if (!Blind) {
+                Sprintf(post_engr_text,
+                        "The dead bugs on the %s start moving!",
+                        surface(u.ux, u.uy));
+                eknown = TRUE;
+            }
+            break;
 
 			/* RAY wands */
 		    case WAN_MAGIC_MISSILE:
@@ -1504,7 +1514,8 @@ static const char *epitaphs[] = {
 
 	/* from UnNetHack */
 	"Hack 1984-1985",
-	"NetHack 1987-2003",
+	"NetHack 1987-2003?",
+	"American Democracy 1776-2016",
 
 	/* from UnNetHackPlus */
 	"SporkHack 2007-2010",

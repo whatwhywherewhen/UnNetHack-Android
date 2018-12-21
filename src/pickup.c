@@ -620,6 +620,59 @@ boolean grab;	 /* forced pickup, rather than forced leave behind? */
 }
 #endif /* AUTOPICKUP_EXCEPTIONS */
 
+static
+boolean
+autopick_testobj(otmp, calc_costly)
+struct obj *otmp;
+boolean calc_costly;
+{
+    static boolean costly = FALSE;
+    const char *otypes = flags.pickup_types;
+    boolean pickit;
+
+    /* calculate 'costly' just once for a given autopickup operation */
+    if (calc_costly) {
+        costly = (otmp->where == OBJ_FLOOR
+                  && costly_spot(otmp->ox, otmp->oy));
+    }
+
+    /* first check: reject if an unpaid item in a shop */
+    if (costly && !otmp->no_charge) {
+        return FALSE;
+    }
+
+    /* check for pickup_types */
+    pickit = (!*otypes || index(otypes, otmp->oclass));
+
+#ifdef AUTOPICKUP_EXCEPTIONS
+    /* check for "always pick up */
+    if (!pickit) {
+        pickit = is_autopickup_exception(otmp, TRUE);
+    }
+
+    /* then for "never pick up */
+    if (pickit) {
+        pickit = !is_autopickup_exception(otmp, FALSE);
+    }
+#endif
+
+    /* pickup_thrown overrides pickup_types and exceptions */
+    if (!pickit) {
+        pickit = (flags.pickup_thrown && otmp->was_thrown);
+    }
+
+    /* don't pick up dropped items */
+    if (pickit) {
+        pickit = flags.pickup_dropped || !otmp->was_dropped;
+    }
+    /* never pick up sokoban prize */
+    if (Is_sokoprize(otmp)) {
+        pickit = FALSE;
+    }
+
+    return pickit;
+}
+
 /*
  * Pick from the given list using flags.pickup_types.  Return the number
  * of items picked (not counts).  Create an array that returns pointers
@@ -633,51 +686,31 @@ struct obj *olist;	/* the object list */
 int follow;		/* how to follow the object list */
 menu_item **pick_list;	/* list of objects and counts to pick up */
 {
-	menu_item *pi;	/* pick item */
-	struct obj *curr;
-	int n;
-	const char *otypes = flags.pickup_types;
+    menu_item *pi; /* pick item */
+    struct obj *curr;
+    int n;
+    boolean check_costly = TRUE;
 
-	/* first count the number of eligible items */
-	for (n = 0, curr = olist; curr; curr = FOLLOW(curr, follow)) {
-#ifndef AUTOPICKUP_EXCEPTIONS
-	    if ((!*otypes || index(otypes, curr->oclass) ||
-	         (flags.pickup_thrown && curr->was_thrown)) &&
-	        (flags.pickup_dropped || !curr->was_dropped) &&
-	        !Is_sokoprize(curr))
-#else
-	    if ((!*otypes || index(otypes, curr->oclass) ||
-	         (flags.pickup_thrown && curr->was_thrown) ||
-		 is_autopickup_exception(curr, TRUE)) &&
-	        ((flags.pickup_dropped || !curr->was_dropped) &&
-	         !is_autopickup_exception(curr, FALSE) &&
-	         !Is_sokoprize(curr)))
-#endif
-		n++;
-	}
+    /* first count the number of eligible items */
+    for (n = 0, curr = olist; curr; curr = FOLLOW(curr, follow)) {
+        if (autopick_testobj(curr, check_costly)) {
+            ++n;
+        }
+        check_costly = FALSE; /* only need to check once per autopickup */
+    }
 
-	if (n) {
-	    *pick_list = pi = (menu_item *) alloc(sizeof(menu_item) * n);
-	    for (n = 0, curr = olist; curr; curr = FOLLOW(curr, follow))
-#ifndef AUTOPICKUP_EXCEPTIONS
-		if ((!*otypes || index(otypes, curr->oclass) ||
-	             (flags.pickup_thrown && curr->was_thrown)) &&
-	            (flags.pickup_dropped || !curr->was_dropped) &&
-	            !Is_sokoprize(curr)) {
-#else
-	    if ((!*otypes || index(otypes, curr->oclass) ||
-		 (flags.pickup_thrown && curr->was_thrown) ||
-		 is_autopickup_exception(curr, TRUE)) &&
-	        ((flags.pickup_dropped || !curr->was_dropped) &&
-	         !is_autopickup_exception(curr, FALSE) &&
-	         !Is_sokoprize(curr))) {
-#endif
-		    pi[n].item.a_obj = curr;
-		    pi[n].count = curr->quan;
-		    n++;
-		}
-	}
-	return n;
+    if (n) {
+        *pick_list = pi = (menu_item *) alloc(sizeof (menu_item) * n);
+        for (n = 0, curr = olist; curr; curr = FOLLOW(curr, follow)) {
+            if (autopick_testobj(curr, FALSE)) {
+                pi[n].item.a_obj = curr;
+                pi[n].count = curr->quan;
+                n++;
+            }
+        }
+    }
+
+    return n;
 }
 
 
@@ -705,8 +738,9 @@ menu_item **pick_list;		/* return list of items picked */
 int how;			/* type of query */
 boolean FDECL((*allow), (OBJ_P));/* allow function */
 {
+	int i;
 #ifdef SORTLOOT
-	int i, j;
+	int j;
 #endif
 	int n;
 	winid win;
@@ -820,7 +854,6 @@ boolean FDECL((*allow), (OBJ_P));/* allow function */
 
 	if (n > 0) {
 	    menu_item *mi;
-	    int i;
 
 	    /* fix up counts:  -1 means no count used => pick all */
 	    for (i = 0, mi = *pick_list; i < n; i++, mi++)
@@ -1264,8 +1297,6 @@ boolean telekinesis;
 	}
     }
 
-    if (obj->otyp == SCR_SCARE_MONSTER && result <= 0 && !container)
-	obj->spe = 0;
     return result;
 }
 
@@ -1395,20 +1426,25 @@ boolean telekinesis;	/* not picking it up directly by hand */
 		return -1;
 	    }
 	} else  if (obj->otyp == SCR_SCARE_MONSTER) {
-	    if (obj->blessed) obj->blessed = 0;
-	    else if (!obj->spe && !obj->cursed) obj->spe = 1;
-	    else {
-		pline_The("scroll%s %s to dust as you %s %s up.",
-			plur(obj->quan), otense(obj, "turn"),
-			telekinesis ? "raise" : "pick",
-			(obj->quan == 1L) ? "it" : "them");
-		if (!(objects[SCR_SCARE_MONSTER].oc_name_known) &&
-				    !(objects[SCR_SCARE_MONSTER].oc_uname))
-		    docall(obj);
-		useupf(obj, obj->quan);
-		return 1;	/* tried to pick something up and failed, but
-				   don't want to terminate pickup loop yet   */
-	    }
+		if (obj->blessed) {
+			obj->blessed = 0;
+		} else if (!obj->cursed) {
+			obj->cursed = 1;
+		} else {
+			pline_The("scroll%s %s to dust as you %s %s up.",
+			          plur(obj->quan), otense(obj, "turn"),
+			          telekinesis ? "raise" : "pick",
+			          (obj->quan == 1L) ? "it" : "them");
+			makeknown(obj->otyp);
+			useupf(obj, obj->quan);
+			return 1; /* tried to pick something up and failed, but
+			             don't want to terminate pickup loop yet   */
+		}
+		/* BUC known but scroll still unknown */
+		if (obj->bknown && !objects[obj->otyp].oc_name_known) {
+			Your("%s %s briefly.", xname(obj), otense(obj, "vibrate"));
+			makeknown(obj->otyp);
+		}
 	}
 
 	if ((res = lift_object(obj, (struct obj *)0, &count, telekinesis)) <= 0)
@@ -2182,6 +2218,19 @@ register struct obj *obj;
 	    (void) add_to_container(current_container, obj);
 	    current_container->owt = weight(current_container);
 	}
+
+    /* blessed or uncursed scrolls of charging charge bag of tricks */
+    if (current_container && (current_container->otyp == BAG_OF_TRICKS) &&
+            obj->otyp == SCR_CHARGING && !obj->cursed) {
+        makeknown(obj->otyp);
+        makeknown(current_container->otyp);
+        pline("The %s digests the magic of the %s!", xname(current_container), xname(obj));
+        recharge(current_container, (obj->blessed ? 1 : 0));
+        if (current_container->spe > 0) {
+            current_container = NULL;
+        }
+    }
+
 	/* gold needs this, and freeinv() many lines above may cause
 	 * the encumbrance to disappear from the status, so just always
 	 * update status immediately.

@@ -45,15 +45,6 @@ STATIC_DCL boolean FDECL(maybe_cannibal, (int,BOOLEAN_P));
 
 char msgbuf[BUFSZ];
 
-/* hunger texts used on bottom line (each 8 chars long) */
-#define SATIATED	0
-#define NOT_HUNGRY	1
-#define HUNGRY		2
-#define WEAK		3
-#define FAINTING	4
-#define FAINTED		5
-#define STARVED		6
-
 /* also used to see if you're allowed to eat cats and dogs */
 #define CANNIBAL_ALLOWED() (Role_if(PM_CAVEMAN) || Race_if(PM_ORC) || Race_if(PM_VAMPIRE))
 
@@ -469,7 +460,11 @@ boolean allowmsg;
 		if (allowmsg) {
 			if (Upolyd)
 				You("have a bad feeling deep inside.");
-			You("cannibal!  You will regret this!");
+			if (Hallucination) {
+				You("feel unaccountably peckish.");      /* Fallen London */
+			} else {
+				You("cannibal!  You will regret this!");
+			}
 		}
 		HAggravate_monster |= FROMOUTSIDE;
 		change_luck(-rn1(4,2));		/* -5..-2 */
@@ -518,6 +513,8 @@ register int pm;
 		if ((!flags.perma_hallu && Hallucination)) {
 		    (void) make_hallucinated(0L, FALSE, 0L);
 		    pline("The world seems less enchanting.");
+		} if (!!flags.perma_hallu) {
+			pline("The world briefly seems less enchanting.");
 		}
 		break;
 	    case PM_DEATH:
@@ -1813,6 +1810,9 @@ eatspecial() /* called after eating non-food */
 #endif
 		else
 		    useupf(otmp, otmp->quan);
+#ifdef MEXTRA
+			vault_gd_watching(GD_EATGOLD);
+#endif
 		return;
 	}
 	if (otmp->oclass == POTION_CLASS) {

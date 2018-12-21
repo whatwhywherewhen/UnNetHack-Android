@@ -759,10 +759,9 @@ unturn_dead(mon)
 struct monst *mon;
 {
 	struct obj *otmp, *otmp2;
-	struct monst *mtmp2;
-	char owner[BUFSZ], corpse[BUFSZ];
+	char corpse[BUFSZ];
 	boolean youseeit;
-	int once = 0, res = 0;
+	int res = 0;
 
 	youseeit = (mon == &youmonst) ? TRUE : canseemon(mon);
 	otmp2 = (mon == &youmonst) ? invent : mon->minvent;
@@ -1914,7 +1913,7 @@ dozap()
 	if(!zappable(obj)) {
 	    pline("%s", nothing_happens);
 	    /* if nameempty is set, then #name unnamed known empty wands */
-	    if (iflags.nameempty && !obj->onamelth) oname(obj, iflags.nameempty);
+	    if (iflags.nameempty && !obj->onamelth) obj = oname(obj, iflags.nameempty);
 	}
 	/* PM 2008-04-16: 50% chance of blowing up, if zapped 20 times.
 	 * Same probability as in muse.c precheck() for monsters */
@@ -3763,11 +3762,9 @@ register int dx,dy;
 	    bounce = 0;
 	    range--;
 	    if (range) {
-		/* lava does not bounce off walls, but melts them;
-		   intentionally do not use isok() here so lava
-		   will not bounce off of the edge of the map */
+		/* lava does not bounce off walls but melts them */
 		if (abstype == ZT_LAVA) {
-		    if (IS_STWALL(levl[sx][sy].typ) &&
+		    if (isok(sx, sy) && IS_STWALL(levl[sx][sy].typ) &&
 			  !(levl[sx][sy].wall_info & W_NONDIGGABLE)) {
 			levl[sx][sy].typ = LAVAPOOL;
 			levl[sx][sy].lit = 1;
@@ -3776,7 +3773,7 @@ register int dx,dy;
 			    pline("%s melts the wall!", The(fltxt));
 			    newsym(sx, sy);
 			}
-		    } else if (is_any_icewall(sx, sy)) {
+		    } else if (isok(sx, sy) && is_any_icewall(sx, sy)) {
 			melt_icewall(sx, sy);
 		    }
 		    break;

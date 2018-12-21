@@ -1020,17 +1020,22 @@ ring:
 		/* turn [(n:n)] wand charges into [n:n] */
 		if ((tmp = strstr(bp, "[("))) {
 			char *tmp2 = strstr(tmp, ")]");
-			memmove(tmp2, tmp2 + 1, strlen(tmp2 + 1) + 1);
-			memmove(tmp + 1, tmp + 2, strlen(tmp + 2) + 1);
+			if (tmp2) {
+				memmove(tmp2, tmp2 + 1, strlen(tmp2 + 1) + 1);
+				memmove(tmp + 1, tmp + 2, strlen(tmp + 2) + 1);
+			}
 		}
 	}
- #ifdef SHOW_WEIGHT
-       /* [max] weight inventory */
-     if ((obj->otyp != BOULDER) || !throws_rocks (youmonst.data))
-       if ((obj->otyp < LUCKSTONE) && (obj->otyp != CHEST) && (obj->otyp != LARGE_BOX) &&
-           (obj->otyp != ICE_BOX) && (!Hallucination && flags.invweight))
-                 Sprintf (eos(bp), " {%d}", obj->owt);
- #endif
+#ifdef SHOW_WEIGHT
+    /* [max] weight inventory */
+    if ((obj->otyp != BOULDER) || !throws_rocks (youmonst.data)) {
+        if ((obj->otyp < LUCKSTONE) && (obj->otyp != CHEST) && (obj->otyp != LARGE_BOX) &&
+                (obj->otyp != ICE_BOX) && (!Hallucination && flags.invweight)) {
+            Sprintf (eos(bp), " {%d}", obj->owt);
+        }
+    }
+
+#endif
 
 	return(bp);
 }

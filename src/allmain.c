@@ -6,6 +6,8 @@
 
 #include "hack.h"
 
+#include <limits.h>
+
 #ifndef NO_SIGNAL
 #include <signal.h>
 #endif
@@ -148,8 +150,10 @@ moveloop()
     int clock_base = 80000L-timeout_start;
     int past_clock;
     /* for keeping track of Elbereth and correctstatus line display */
+#ifdef ELBERETH
     int was_on_elbereth = 0;
     int is_on_elbereth = 0;
+#endif
     boolean can_regen = can_regenerate();
 
     flags.moonphase = phase_of_the_moon();
@@ -692,6 +696,18 @@ display_gamewindows()
     display_nhwindow(WIN_MAP, FALSE);
 }
 
+static
+void
+init_level_seeds()
+{
+	int i;
+	set_random_state(level_info[0].seed);
+	for (i=1; i<MAXLINFO; i++) {
+		level_info[i].seed = rn2(INT_MAX);
+	}
+}
+
+
 void
 newgame()
 {
@@ -705,6 +721,8 @@ newgame()
 
 	for (i = 0; i < NUMMONS; i++)
 		mvitals[i].mvflags = mons[i].geno & G_NOCORPSE;
+
+	init_level_seeds();
 
 	init_objects();		/* must be before u_init() */
 

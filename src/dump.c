@@ -11,6 +11,12 @@
 #  include <utime.h>
 #  include <errno.h>
 # endif
+
+# ifdef UNIX /* DUMP-patch dump filename chmod() */
+#  include <sys/types.h>
+#  include <sys/stat.h>
+# endif
+
 #ifdef ANDROID
 #  include <sys/stat.h>
 #endif
@@ -87,6 +93,9 @@ void
 dump_init()
 {
   if (dump_fn[0]) {
+#ifdef UNIX
+    mode_t dumpmode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+#endif
     char *new_dump_fn = get_dump_filename();
     if(!new_dump_fn)
     	return;
@@ -105,6 +114,10 @@ if(dump_format&DUMP_FORMAT_TEXT) {
     if (!dump_fp) {
 	pline("Can't open %s for output.", new_dump_fn);
 	pline("Dump file not created.");
+#ifdef UNIX
+    } else {
+	chmod(new_dump_fn, dumpmode);
+#endif
     }
 #ifdef ANDROID
 	new_dump_fn[strlen(new_dump_fn)-4] = 0;
@@ -116,9 +129,12 @@ if(dump_format&DUMP_FORMAT_HTML) {
     if (!html_dump_fp) {
 	pline("Can't open %s for output.", new_dump_fn);
 	pline("Html dump file not created.");
+#ifdef UNIX
+    } else {
+	chmod(html_dump_path, dumpmode);
+#endif
     }
 }
-    if (new_dump_fn) free(new_dump_fn);
   }
 }
 #endif
@@ -202,8 +218,15 @@ const char *pre, *str;
 #ifdef DUMP_LOG
   if (dump_fp)
     fprintf(dump_fp, "%s%s\n", pre, str);
-  if (html_dump_fp)
-    fprintf(html_dump_fp, "%s%s<br />\n", pre, str);
+  if (html_dump_fp) {
+      while (*pre != '\0') {
+          fprintf(html_dump_fp, "%s", html_escape_character(*pre++));
+      }
+      while (*str != '\0') {
+          fprintf(html_dump_fp, "%s", html_escape_character(*str++));
+      }
+    fprintf(html_dump_fp, "<br />\n");
+  }
 #endif
 }
 
@@ -212,16 +235,22 @@ extern boolean get_menu_coloring(const char *str, int *color, int *attr);
 #endif
 
 static char tmp_html_link[BUFSZ];
+static char tmp_html_link_name[BUFSZ];
 /** Return a link to nethackwiki . */
 char *
 html_link(link_name, name)
 const char *link_name;
 const char *name;
 {
-	snprintf(tmp_html_link, BUFSZ,
-		"<a href=\"http://nethackwiki.com/wiki/%s\">%s</a>",
-		link_name, name);
-	return tmp_html_link;
+    tmp_html_link_name[0] = '\0';
+    while (*name != '\0' && strlen(tmp_html_link_name) < BUFSZ - 10) {
+        sprintf(eos(tmp_html_link_name), "%s", html_escape_character(*name++));
+    }
+
+    snprintf(tmp_html_link, BUFSZ,
+            "<a href=\"http://nethackwiki.com/wiki/%s\">%s</a>",
+            link_name, tmp_html_link_name);
+    return tmp_html_link;
 }
 
 /** Dumps an object from the inventory. */
@@ -499,7 +528,6 @@ dump_screenshot()
 	char screenshot[BUFSZ];
 	char *filename = get_dump_filename();
 	Sprintf(screenshot, "%s_screenshot_%ld_t%ld.html", filename, u.ubirthday, moves);
-	if (filename) free(filename);
 
 	html_dump_fp = fopen(screenshot, "w");
 	if (!html_dump_fp) {

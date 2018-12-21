@@ -146,9 +146,6 @@ STATIC_PTR int NDECL(wiz_show_wmodes);
 STATIC_PTR int NDECL(wiz_mazewalkmap);
 extern char SpLev_Map[COLNO][ROWNO];
 STATIC_PTR int NDECL(wiz_showkills);	/* showborn patch */
-#ifdef SHOW_BORN
-extern void FDECL(list_vanquished, (int, BOOLEAN_P, BOOLEAN_P)); /* showborn patch */
-#endif /* SHOW_BORN */
 #if defined(__BORLANDC__) && !defined(_WIN32)
 extern void FDECL(show_borlandc_stats, (winid));
 #endif
@@ -183,6 +180,8 @@ static char last_cmd_char='\0';
 
 STATIC_DCL char *NDECL(parse);
 STATIC_DCL boolean FDECL(help_dir, (CHAR_P,const char *));
+
+static int debug_show_colors();
 
 STATIC_PTR int
 doprev_message()
@@ -832,7 +831,7 @@ wiz_show_wmodes()
 /* #showkills command */
 STATIC_PTR int wiz_showkills()		/* showborn patch */
 {
-	list_vanquished('y', FALSE, TRUE);
+	list_vanquished('y', FALSE);
 	return 0;
 }
 
@@ -974,6 +973,10 @@ boolean want_disp;
 		enl_msg("Monster difficulty range ", "is", "was", buf);
 		Sprintf(buf, " %d", level_difficulty());
 		enl_msg("Level difficulty ", "is", "was", buf);
+	}
+	if (wizard) {
+		Sprintf(buf, " %u", level_info[0].seed);
+		enl_msg("Seed ", "is", "was", buf);
 	}
 #endif
 
@@ -1406,6 +1409,15 @@ int typ;
       any.a_int = 4;
       add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, 'd', 'f', ATR_NONE, "Annotate the current level", MENU_UNSELECTED);
 
+      if ((flags.last_broken_otyp != STRANGE_OBJECT) &&
+          (!objects[flags.last_broken_otyp].oc_name_known)){
+		char buf[BUFSZ];
+		Sprintf(buf, "Name %s (last broken object)",
+				an(obj_typename(flags.last_broken_otyp)));
+		any.a_int = 5;
+		add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, 'e', 'V', ATR_NONE, buf, MENU_UNSELECTED);
+      }
+
       any.a_int = 0;
       add_menu(win, NO_GLYPH, MENU_DEFCNT, &any, 0, 'q', ATR_NONE, "", MENU_UNSELECTED);
 
@@ -1446,6 +1458,9 @@ int typ;
 	break;
     case 3:
 	donamelevel();
+	break;
+    case 4:
+	docall_input(flags.last_broken_otyp);
 	break;
     }
     return 0;
@@ -1824,6 +1839,7 @@ struct ext_func_tab extcmdlist[] = {
 #ifdef LIVELOG_SHOUT
 	{"shout", "shout something", doshout, FALSE},
 #endif
+    {"show_colors", "show available colors", debug_show_colors, TRUE},
 	{"sit", "sit down", dosit, FALSE},
 	{"tip", "empty a container of its contents", dotip, FALSE},
 	{"turn", "turn undead", doturn, TRUE},
@@ -2828,13 +2844,81 @@ readchar()
 	return((char) sym);
 }
 
+/** Returns the number of known up- or downstairs. */
+static int
+find_remembered_stairs(boolean upstairs, coord *cc)
+{
+    xchar x, y;
+    int stair, ladder, branch;
+    if (upstairs) {
+        stair = S_upstair;
+        ladder = S_upladder;
+        branch = S_upstair;
+    } else {
+        stair = S_dnstair;
+        ladder = S_dnladder;
+        branch = S_dnstair;
+    }
+
+    /* Prefer already marked travel positions. */
+    x = iflags.travelcc.x;
+    y = iflags.travelcc.y;
+    if (isok(x, y) &&
+            (glyph_to_cmap(level.locations[x][y].glyph) == stair ||
+             glyph_to_cmap(level.locations[x][y].glyph) == ladder ||
+             glyph_to_cmap(level.locations[x][y].glyph) == branch)) {
+        cc->x = x;
+        cc->y = y;
+        return TRUE;
+    }
+
+    /* We can't reference the stairs directly because mimics can mimic fake
+       ones. */
+    int found_stairs = 0;
+    for (x = 0; x < COLNO; x++) {
+        for (y = 0; y < ROWNO; y++) {
+            if (glyph_to_cmap(level.locations[x][y].glyph) == stair ||
+                    glyph_to_cmap(level.locations[x][y].glyph) == ladder ||
+                    glyph_to_cmap(level.locations[x][y].glyph) == branch) {
+                if (found_stairs == 0) {
+                    cc->x = x;
+                    cc->y = y;
+                }
+                found_stairs++;
+            }
+        }
+    }
+
+    return found_stairs;
+}
+
+static int not_interactive=0;
+int
+do_stair_travel(char up_or_down)
+{
+    boolean upstairs = (up_or_down == '<');
+    coord cc;
+    int stairs = 0;
+    if ((stairs = find_remembered_stairs(upstairs, &cc)) > 0) {
+        iflags.travelcc.x = cc.x;
+        iflags.travelcc.y = cc.y;
+
+        /* kludge, the command methods should be properly refactored similar
+         * to what nh4 did */
+        not_interactive = (stairs == 1);
+        dotravel();
+        not_interactive = 0;
+        return 1;
+    }
+    return 0;
+}
+
 STATIC_PTR int
 dotravel()
 {
 	/* Keyboard travel command */
 	static char cmd[2];
 	coord cc;
-
 	if (!iflags.travelcmd) return 0;
 	cmd[1]=0;
 	cc.x = iflags.travelcc.x;
@@ -2844,11 +2928,14 @@ dotravel()
 	    cc.x = u.ux;
 	    cc.y = u.uy;
 	}
-	pline("Where do you want to travel to?");
-	if (getpos(&cc, TRUE, "the desired destination") < 0) {
-		/* user pressed ESC */
-		return 0;
-	}
+
+    if (!not_interactive) {
+        pline("Where do you want to travel to?");
+        if (getpos(&cc, TRUE, "the desired destination") < 0) {
+            /* user pressed ESC */
+            return 0;
+        }
+    }
 	iflags.travelcc.x = u.tx = cc.x;
 	iflags.travelcc.y = u.ty = cc.y;
 	iflags.autoexplore = FALSE;
@@ -3004,6 +3091,17 @@ sokoban_trickster()
 		u.uconduct.sokoban += 1;
 	}
 #endif
+}
+
+static int
+debug_show_colors()
+{
+#ifdef TTY_GRAPHICS
+    if (!strncmpi(windowprocs.name, "tty", 3)) {
+        tty_debug_show_colors();
+    }
+#endif
+    return 0;
 }
 
 /*cmd.c*/

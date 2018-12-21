@@ -1,13 +1,52 @@
-2014-XX-XX  UnNetHack 5.X.X
+201X-XX-XX  UnNetHack 5.X.X
+	* Support SOURCE_DATE_EPOCH for reproducible builds (patch from Debian)
 	* Players killed by Nazgul will arise as Barrow Wights in bones files
 	  (a slight change from the original mythology, we know)
 	* Reviving drained corpses sometimes won't work, and may destroy 
 	  the corpse. Partially drained corpses are more likely to revive.
 	* Wand wresting happens always when an empty wand is zapped with a chance
 	  depending on BUC state if an effect is produced
+	* Reproducible dungeon layout. Set OPTIONS=seed:number to get the same
+	  dungeon layout.
+	* Vault Guards get angry if you eat gold in front of them. (From Nethack 
+		 Development Code - used with permission)
+	* Several cosmetic changes - additional engravings, hallucinatory monsters, and funny messages.
+	* Picking up scrolls of scare monsters change BUC from blessed to
+	  uncursed to cursed
+	* Default to UTF8graphics on supporting terminals
+	* Putting blessed and uncursed scrolls of charging into a bag of
+	  tricks charges it
 
 	* item changes:
 	  - Decreased weight of all mithril armor, especially ones of elven make
+
+	* user interface improvements:
+	  - Added naming last broken object to #name menu (idea from AceHack/NH4)
+	  - Automatically identify scrolls of scare monster during pickup when
+	    turning to dust or changing known BUC state
+	  - Don't autopickup unpaid items (from NetHack 3.6)
+	  - Change default of shopkeeper sell prompt to 'n' (idea by aosdict)
+	  - Autoidentify wands of undead turning if engraving produces a message
+	  - Added stone, strangled, levitation, flying, and riding indicators
+	    to the status line
+	  - Status indicators on third statuslines
+	  - New option "statuslines" to force 2 or 3 status lines
+	  - Pressing > or < autotravels to the stairs if not already on
+	    the right kind of stairs
+
+	* dungeon layout:
+	  - Backyard of watery castle get trap doors to ensure player can
+	    descend to the VotD
+	  - Replaced lava with water on lava castle
+	  - Don't generate 1000 fountains in bigrm-13
+
+	* customizable colors:
+	  - Dark gray improved on terminals supporting 256 colors
+	  - Configurable system colors using RGB values
+	     For example, put "COLOR=light blue:5f00ff" into your config file
+	  - Find a close match for an arbitrary RGB value in 256 color mode
+	  - New extended command: show_colors
+	  - 24 bit color support by detecting COLORTERM=truecolor
 
 	* bug fixes
 	  - Fixed erroneous messages when remaining in stinking clouds
@@ -16,6 +55,16 @@
 	  - Fixed improper explosion behavior for wand of fire and wand of cold (reported by Stenno)
 	  - Fixed crash when drained troll corpse evaporated but rot timer was
 	    still set on invalid pointer
+	  - Correctly identify uncursed items in bags dropped on altars when hallucinating
+	  - Prevent potential endless when praying and using perma hallucination
+	  - Fixed crash with a configured nameempty option (found and fixed by tertium)
+	  - Fixed crash in X11 inventory
+	  - Fixed possible endless loop in autotravel on the Rogue level
+	  - Fixed lava breath related crash at the edges of the map
+	  - The chest in the Castle containing the wishing wand can never be
+	    trapped (from 3.6.0)
+	  - Picking up items with invweight shows weight of items including
+	    merged items in inventory (reported by aosdict)
 
 	* vanilla bug fixes:
 	  - C343-439: Running NetHack in a terminal window with more than 255

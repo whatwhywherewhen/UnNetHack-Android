@@ -373,6 +373,10 @@ register struct monst *mtmp;
 		    } else {
 			(void)mongets(mtmp, !rn2(3) ? PICK_AXE : DAGGER);
 		    }
+			if (!In_mines(&u.uz) && rn2(7)) {
+				/* outside the mines, dwarves sometimes have booze */
+				mongets(mtmp, POT_BOOZE);
+			}
 		}
 		break;
 # ifdef KOPS
@@ -961,15 +965,9 @@ boolean ghostly;
 	return result;
 }
 
-/*
- * called with [x,y] = coordinates;
- *	[0,0] means anyplace
- *	[u.ux,u.uy] means: near player (if !in_mklev)
- *
- *	In case we make a monster group, only return the one at [x,y].
- */
+static
 struct monst *
-makemon(ptr, x, y, mmflags)
+_makemon(ptr, x, y, mmflags)
 register struct permonst *ptr;
 register int	x, y;
 register int	mmflags;
@@ -1239,6 +1237,16 @@ register int	mmflags;
 		m_initweap(mtmp);	/* equip with weapons / armor */
 	    m_initinv(mtmp);  /* add on a few special items incl. more armor */
 	    m_dowear(mtmp, TRUE);
+
+	    /* domestic animals may get a saddle */
+	    if (!rn2(100) && can_saddle(mtmp) && is_domestic(ptr)) {
+		struct obj *otmp = mksobj(SADDLE, FALSE, FALSE);
+		(void) mpickobj(mtmp, otmp);
+		mtmp->misc_worn_check |= W_SADDLE;
+		otmp->owornmask = W_SADDLE;
+		otmp->leashmon = mtmp->m_id;
+		update_mon_intrinsics(mtmp, otmp, TRUE, FALSE);
+	    }
 	} else {
 	    /* no initial inventory is allowed */
 	    if (mtmp->minvent) discard_minvent(mtmp);
@@ -1262,6 +1270,25 @@ register int	mmflags;
 	    newsym(mtmp->mx,mtmp->my);	/* make sure the mon shows up */
 
 	return(mtmp);
+}
+
+/*
+ * called with [x,y] = coordinates;
+ *	[0,0] means anyplace
+ *	[u.ux,u.uy] means: near player (if !in_mklev)
+ *
+ *	In case we make a monster group, only return the one at [x,y].
+ */
+struct monst *
+makemon(ptr, x, y, mmflags)
+register struct permonst *ptr;
+register int	x, y;
+register int	mmflags;
+{
+	use_mon_rng++;
+	struct monst *mtmp = _makemon(ptr, x, y, mmflags);
+	use_mon_rng--;
+	return mtmp;
 }
 
 int
@@ -1451,17 +1478,19 @@ static NEARDATA struct {
 	char mchoices[SPECIAL_PM];	/* value range is 0..127 */
 } rndmonst_state = { -1, {0} };
 
-/* select a random monster type */
+
+static
 struct permonst *
-rndmonst()
+_rndmonst()
 {
 	register struct permonst *ptr;
 	register int mndx, ct;
 
 	if (level.mon_gen &&
 	    (rn2(100) < level.mon_gen->override_chance) &&
-	    ((ptr = get_override_mon(level.mon_gen)) != 0))
+	    ((ptr = get_override_mon(level.mon_gen)) != 0)) {
 	    return ptr;
+	}
 
 	if (rndmonst_state.choice_count < 0) {	/* need to recalculate */
 	    int minmlev, maxmlev;
@@ -1542,6 +1571,16 @@ rndmonst()
 	    return (struct permonst *)0;
 	}
 	return &mons[mndx];
+}
+
+/* select a random monster type */
+struct permonst *
+rndmonst()
+{
+	use_mon_rng++;
+	struct permonst *tmp = _rndmonst();
+	use_mon_rng--;
+	return tmp;
 }
 
 /* called when you change level (experience or dungeon depth) or when
@@ -2031,7 +2070,7 @@ struct obj *bag;
 	boolean gotone = TRUE;
 	int cnt;
 	struct monst *mtmp;
-	struct obj *otmp;
+	struct obj *otmp = NULL;
 
 	consume_obj_charge(bag, TRUE);
 

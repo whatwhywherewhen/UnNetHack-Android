@@ -6,6 +6,7 @@
 
 #include "hack.h"
 #include "dlb.h"
+#include "date.h"
 
 #include <sys/stat.h>
 #include <signal.h>
@@ -141,6 +142,10 @@ char *argv[];
 		prscore(argc, argv);
 		exit(EXIT_SUCCESS);
 	    }
+	    if (!strncmp(argv[1], "--version", 9)) {
+		printf("%s\n", VERSION_ID);
+		exit(EXIT_SUCCESS);
+	    }
 	}
 
 	/*
@@ -157,6 +162,10 @@ char *argv[];
 #ifdef __linux__
 	check_linux_console();
 #endif
+#ifdef UTF8_GLYPHS
+	check_utf8_console();
+#endif
+
 	initoptions();
 	init_nhwindows(&argc,argv);
 	exact_username = whoami();
@@ -166,7 +175,6 @@ char *argv[];
 #ifdef __linux__
 	init_linux_cons();
 #endif
-
 	/*
 	 * It seems you really want to play.
 	 */

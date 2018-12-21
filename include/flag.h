@@ -9,6 +9,8 @@
 #ifndef FLAG_H
 #define FLAG_H
 
+#include "color.h"
+
 /*
  * Persistent flags that are saved and restored with the game.
  *
@@ -131,6 +133,8 @@ struct flag {
 	boolean	bones;		/* allow loading bones */
 	boolean	perma_hallu;	/* let the player permanently hallucinate */
 
+	int last_broken_otyp;	/* from last object that got broken */
+
 	/* KMH, role patch -- Variables used during startup.
 	 *
 	 * If the user wishes to select a role, race, gender, and/or alignment
@@ -202,7 +206,8 @@ struct flag {
 struct instance_flags {
 	boolean  cbreak;	/* in cbreak mode, rogue format */
 #ifdef CURSES_GRAPHICS
-	boolean  cursesgraphics; /* Use portable curses extended characters */
+	boolean  classic_status;	/* What kind of horizontal statusbar to use */
+	boolean  cursesgraphics;	/* Use portable curses extended characters */
 #endif
 	boolean  DECgraphics;	/* use DEC VT-xxx extended character set */
 	boolean  echo;		/* 1 to echo characters */
@@ -297,6 +302,9 @@ struct instance_flags {
 	boolean paranoid_trap; /* Ask for 'yes' before walking into known traps */
 	boolean paranoid_lava; /* Ask for 'yes' before walking into lava */
 	boolean paranoid_water; /* Ask for 'yes' before walking into water */
+#ifdef USE_TILES
+	boolean vt_nethack;
+#endif
 #ifdef QUIVER_FIRED
 	boolean quiver_fired;	/* quiver with f command */
 #endif
@@ -388,6 +396,13 @@ struct instance_flags {
 	boolean  vanilla_ui_behavior;	/* fall back to vanilla behavior */
 	boolean  show_annotation;	/* level annotation when entering level */
 	int  statuslines;	/* number of status lines */
+#ifdef TTY_GRAPHICS
+    int color_mode; /* number of available colors */
+#endif
+#ifdef TEXTCOLOR
+    uint64_t color_definitions[CLR_MAX];
+    char     truecolor_separator;
+#endif
 #ifdef ANDROID
 	boolean  automenu; /* Automatically show menues */
 #endif

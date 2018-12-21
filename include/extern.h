@@ -145,6 +145,7 @@ E void NDECL(bot);
 #ifdef DUMP_LOG
 E void FDECL(bot1str, (char *));
 E void FDECL(bot2str, (char *));
+E void FDECL(bot3str, (char *));
 #endif
 
 /* ### cmd.c ### */
@@ -196,7 +197,11 @@ E void NDECL(sanity_check);
 E char FDECL(yn_function, (const char *, const char *, CHAR_P));
 E char FDECL(paranoid_yn, (const char *, BOOLEAN_P));
 E void NDECL(sokoban_trickster);
+E void FDECL(list_vanquished, (int, BOOLEAN_P));
 E void NDECL(list_vanquishedonly);
+#ifdef TTY_GRAPHICS
+E int tty_debug_show_colors();
+#endif
 
 /* ### dbridge.c ### */
 
@@ -351,6 +356,7 @@ E int NDECL(do_mname);
 E struct obj *FDECL(oname, (struct obj *,const char *));
 E int NDECL(ddocall);
 E void FDECL(docall, (struct obj *));
+E void FDECL(docall_input, (int));
 E const char *NDECL(rndghostname);
 E char *FDECL(x_monnam, (struct monst *,int,const char *,int,BOOLEAN_P));
 E char *FDECL(l_monnam, (struct monst *));
@@ -489,6 +495,7 @@ E void FDECL(switch_graphics, (int));
 E void FDECL(assign_rogue_graphics, (BOOLEAN_P));
 #endif
 E void FDECL(assign_utf8graphics_symbol, (int, glyph_t));
+E void FDECL(assign_moria_graphics, (BOOLEAN_P));
 
 /* ### dump.c ### */
 
@@ -661,6 +668,7 @@ E void FDECL(make_grave, (int,int,const char *));
 
 /* ### exper.c ### */
 
+E long FDECL(newuexp, (int));
 E int FDECL(experience, (struct monst *,int));
 E void FDECL(more_experienced, (int,int,int));
 E void FDECL(losexp, (const char *));
@@ -841,7 +849,9 @@ E int FDECL(strncmpi, (const char *,const char *,int));
 E char *FDECL(strstri, (const char *,const char *));
 #endif
 E boolean FDECL(fuzzymatch, (const char *,const char *,const char *,BOOLEAN_P));
-E void NDECL(setrandom);
+E void FDECL(init_random, (unsigned int));
+E void NDECL(reseed_random);
+E void FDECL(set_random_state, (unsigned int));
 E time_t NDECL(getnow);
 E int NDECL(getyear);
 E int NDECL(getmonth);
@@ -1517,6 +1527,7 @@ E void FDECL(discover_object, (int,BOOLEAN_P,BOOLEAN_P));
 E void FDECL(undiscover_object, (int));
 E int NDECL(dodiscovered);
 E void NDECL(dragons_init);
+E void FDECL(makeknown_msg, (int));
 
 /* ### objects.c ### */
 
@@ -1593,6 +1604,7 @@ E void NDECL(free_autopickup_exceptions);
 #ifdef MENU_COLOR
 E boolean FDECL(add_menu_coloring, (char *));
 #endif /* MENU_COLOR */
+E const char * FDECL(clr2colorname, (int));
 
 /* ### pager.c ### */
 

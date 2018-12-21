@@ -260,6 +260,8 @@ E const char sdir[], ndir[];
 #endif
 E const schar xdir[], ydir[], zdir[];
 
+#define DOESCAPE '\033'
+
 E NEARDATA schar tbx, tby;		/* set in mthrowu.c */
 
 E NEARDATA struct multishot { int n, i; short o; boolean s; } m_shot;
@@ -553,12 +555,7 @@ E struct realtime_data {
 E int mailckfreq;
 #endif
 
-#ifdef USE_MERSENNE_TWISTER
-#include <gsl/gsl_rng.h>
-E gsl_rng *rngstate;
-#endif
-
-
+E int use_mon_rng;
 
 E boolean curses_stupid_hack;
 

@@ -7,6 +7,8 @@
 #include "hack.h"
 #include "lev.h"
 
+#include <limits.h>
+
 #ifdef SINKS
 STATIC_DCL void FDECL(dosinkring, (struct obj *));
 #endif /* SINKS */
@@ -263,9 +265,12 @@ doaltarobj(obj)  /* obj is an object dropped on an altar */
 		int bcucount = 0;
 		struct obj *otmp;
 		for (otmp = obj->cobj; otmp; otmp = otmp->nobj) {
-			if (otmp->blessed || otmp->cursed)
+			if ((otmp->blessed || otmp->cursed) && otmp->oclass != COIN_CLASS) {
 				bcucount++;
-			if (!Hallucination) otmp->bknown = 1;
+				if (!Hallucination) otmp->bknown = 1;
+			} else {
+				otmp->bknown = 1;
+			}
 		}
 		if (bcucount == 1) {
 			pline("Looking inside %s, you see a colored flash.",
@@ -900,9 +905,11 @@ dodown()
 			if (flags.autodig && !flags.nopick &&
 				uwep && is_pick(uwep)) {
 				return use_pick_axe2(uwep);
-			} else {
-				You_cant("go down here.");
-				return(0);
+			} else if (do_stair_travel('>')) {
+                return 0;
+            } else {
+                You_cant("go down here.");
+                return(0);
 			}
 		}
 	}
@@ -965,8 +972,12 @@ doup()
 	     && (!sstairs.sx || u.ux != sstairs.sx || u.uy != sstairs.sy
 			|| !sstairs.up)
 	  ) {
-		You_cant("go up here.");
-		return(0);
+        if (do_stair_travel('<')) {
+            return 0;
+        } else {
+            You_cant("go up here.");
+            return(0);
+        }
 	}
 #ifdef STEED
 	if (u.usteed && !u.usteed->mcanmove) {
@@ -1185,12 +1196,16 @@ boolean at_stairs, falling, portal;
 	if (!persistent_level) {
 		delete_levelfile(ledger_no(&u.uz));
 		level_info[ledger_no(&u.uz)].flags = 0;
-	}	
+		level_info[ledger_no(&u.uz)].seed = rn2(INT_MAX);
+	}
 
 #ifdef REINCARNATION
 	if (Is_rogue_level(newlevel) || Is_rogue_level(&u.uz))
 		assign_rogue_graphics(Is_rogue_level(newlevel));
 #endif
+	if (Is_moria_level(newlevel) || Is_moria_level(&u.uz)) {
+		assign_moria_graphics(Is_moria_level(newlevel));
+	}
 #ifdef USE_TILES
 	substitute_tiles(newlevel);
 #endif
@@ -1390,10 +1405,18 @@ boolean at_stairs, falling, portal;
 	    else
 		mnexto(mtmp);
 
-	    if ((mtmp = m_at(u.ux, u.uy)) != 0) {
-		impossible("mnexto failed (do.c)?");
-		(void) rloc(mtmp, FALSE);
-	    }
+            if ((mtmp = m_at(u.ux, u.uy)) != 0) {
+                /* there was an unconditional impossible("mnexto failed (do.c)")
+                   here, but it's not impossible and we're prepared to cope
+                   with the situation, so only say something when debugging */
+                if (wizard)
+                    pline("(monster in hero's way)");
+                if (!rloc(mtmp, TRUE))
+                    /* no room to move it; send it away, to return later */
+                    migrate_to_level(mtmp, ledger_no(&u.uz), MIGR_RANDOM,
+                                     (coord *) 0);
+            }
+
 	}
 
 	/* initial movement of bubbles just before vision_recalc */
