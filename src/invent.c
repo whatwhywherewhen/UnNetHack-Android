@@ -20,7 +20,7 @@ STATIC_PTR int FDECL(ckvalidcat,(struct obj *));
 static char FDECL(display_pickinv,
 		 (const char *,BOOLEAN_P, long *, BOOLEAN_P, BOOLEAN_P));
 static char FDECL(display_pickinv_q,
-		 (const char *,BOOLEAN_P, long *, BOOLEAN_P, const char *, BOOLEAN_P));
+		 (const char *,BOOLEAN_P, long *, BOOLEAN_P, BOOLEAN_P, const char *, BOOLEAN_P));
 STATIC_DCL boolean FDECL(this_type_only, (struct obj *));
 STATIC_DCL void NDECL(dounpaid);
 STATIC_DCL struct obj *FDECL(find_unpaid,(struct obj *,struct obj **));
@@ -1067,7 +1067,7 @@ register const char *let,*word;
 			}
 #endif
 
-		    ilet = display_pickinv_q(lets, TRUE, allowcnt ? &cnt : (long *)0, TRUE, qbuf, allownone);
+		    ilet = display_pickinv_q(lets, TRUE, allowcnt ? &cnt : (long *)0, FALSE, TRUE, qbuf, allownone);
 		    if (ilet && allowcnt && cnt >= 0) {
 		    	if(!cnt) prezero = TRUE;
 		    	allowcnt = 2;
@@ -2286,15 +2286,16 @@ long* out_cnt;
 boolean want_disp;
 boolean want_dump;
 {
-	return display_pickinv_q(lets, want_reply, out_cnt, want_disp, 0, FALSE);
+	return display_pickinv_q(lets, want_reply, out_cnt, want_dump, want_disp, 0, FALSE);
 }
 
 static char
-display_pickinv_q(lets, want_reply, out_cnt, want_disp, quest, allownone)
+display_pickinv_q(lets, want_reply, out_cnt, want_dump, want_disp, quest, allownone)
 register const char *lets;
 boolean want_reply;
 long* out_cnt;
 boolean want_disp;
+boolean want_dump;
 const char *quest;
 boolean allownone;
 {

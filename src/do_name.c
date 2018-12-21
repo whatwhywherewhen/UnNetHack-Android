@@ -9,6 +9,7 @@ static void call_object(int, char *);
 static void call_input(int, char *);
 #ifdef ANDROID
 static void FDECL(docall_ext, (struct obj *,boolean));
+static void call_input_ext(int, char *, boolean);
 #endif
 
 extern const char what_is_an_unknown_object[];		/* from pager.c */
@@ -649,15 +650,12 @@ register struct obj *obj;
 		    OBJ_DESCR(objects[otemp.otyp]));
 	} else {
 	    Sprintf(qbuf, "Call %s:", an(xname(&otemp)));
-#ifdef ANDROID
-	if( showlog )
-		and_getlin_log(qbuf, buf);
-	else
-#endif
-	getlin(qbuf, buf);
-	if(!*buf || *buf == '\033')
 	}
+#ifdef ANDROID
+	call_input_ext(obj->otyp, qbuf, showlog);
+#else
 	call_input(obj->otyp, qbuf);
+#endif
 }
 
 void
@@ -678,9 +676,21 @@ docall_input(int obj_otyp)
 /* Using input from player to name an object type. */
 static void
 call_input(int obj_otyp, char *prompt)
+#ifdef ANDROID
+{
+	call_input_ext(obj_otyp, prompt, FALSE);
+}
+static void
+call_input_ext(int obj_otyp, char *prompt, boolean showlog)
+#endif
 {
 	char buf[BUFSZ];
 
+#ifdef ANDROID
+	if( showlog )
+		and_getlin_log(prompt, buf);
+	else
+#endif
 	getlin(prompt, buf);
 
 	if(!*buf || *buf == '\033') {
