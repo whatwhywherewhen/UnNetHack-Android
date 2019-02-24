@@ -38,6 +38,8 @@
 #undef MAIL
 #undef DEF_MAILREADER
 
+#define PARANOID
+
 # endif /* ANDROIDCONF_H */
 #endif /* ANDROID */
 
