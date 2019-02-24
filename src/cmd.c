@@ -3064,7 +3064,11 @@ paranoid_yn(query,paranoid)
 const char *query;
 boolean paranoid;
 {
-	if (paranoid) {
+	if (paranoid
+#ifdef ANDROID
+		&& !iflags.automenu
+#endif
+	) {
 		char buf[BUFSZ];
 		char query_yesno[2*BUFSZ];
 		/* put [yes/no] between question and question mark? */
