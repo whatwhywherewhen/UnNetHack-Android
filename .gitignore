@@ -1,5 +1,6 @@
 *.swp
 *.swo
+*.exe
 compile
 .idea
 out
@@ -15,6 +16,7 @@ out
 # /dat/
 /dat/Makefile
 /dat/*.lev
+/dat/*.bmp
 /dat/data
 /dat/dungeon.pdf
 /dat/dungeon

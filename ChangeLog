@@ -1,4 +1,4 @@
-201X-XX-XX  UnNetHack 5.X.X
+2019-01-01  UnNetHack 5.2.0
 	* Support SOURCE_DATE_EPOCH for reproducible builds (patch from Debian)
 	* Players killed by Nazgul will arise as Barrow Wights in bones files
 	  (a slight change from the original mythology, we know)
@@ -65,6 +65,8 @@
 	    trapped (from 3.6.0)
 	  - Picking up items with invweight shows weight of items including
 	    merged items in inventory (reported by aosdict)
+	  - Added missing extrinsic to chromatic dragon armor
+	  - Disallow wishing for any chromatic dragon related items
 
 	* vanilla bug fixes:
 	  - C343-439: Running NetHack in a terminal window with more than 255
