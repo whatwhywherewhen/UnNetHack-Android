@@ -2,7 +2,7 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="com.tbd.UnNetHack"
-	android:versionCode="8"
+	android:versionCode="5200"
 	android:versionName="5.2.0"
 	android:installLocation="auto">
 	<uses-sdk android:minSdkVersion="7"
