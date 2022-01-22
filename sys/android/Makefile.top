@@ -37,7 +37,7 @@ DIRPERM  = 0775
 # therefore there should not be anything in GAMEDIR that you want to keep
 # (if there is, you'll have to do the installation by hand or modify the
 # instructions)
-GAMEDIR  = $(PWD)/sys/android/app/assets/$(GAME)dir
+GAMEDIR  = $(PWD)/sys/android/assets/$(GAME)dir
 VARDIR  = $(GAMEDIR)
 SHELLDIR = $(PREFIX)/games
 
