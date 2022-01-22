@@ -1,1 +1,6 @@
 rootProject.name = 'UnNetHack-Android'
+sourceControl {
+    gitRepository("https://github.com/gurrhack/ForkFront-Android.git") {
+        producesModule("com.tbd.forkfront:lib")
+    }
+}
